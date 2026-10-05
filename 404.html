@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GreenMind | Redirecting...</title>
+  <script>
+    // GitHub Pages SPA router redirect
+    var path = window.location.pathname;
+    if (path.indexOf('/Green-Minds') === 0) {
+      if (!path.endsWith('/') && !path.split('/').pop().includes('.')) {
+        window.location.replace(path + '/');
+      }
+    } else {
+      window.location.replace('/Green-Minds/login/');
+    }
+  </script>
+</head>
+<body style="background:#0A160F; color:#fff; font-family:sans-serif; text-align:center; padding-top:100px;">
+  <p>Loading GreenMind page...</p>
+  <script>
+    setTimeout(function() {
+      window.location.replace('/Green-Minds/login/');
+    }, 1000);
+  </script>
+</body>
+</html>
