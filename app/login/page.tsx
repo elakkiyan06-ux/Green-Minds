@@ -60,20 +60,32 @@ function UserLoginContent() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.error || 'Failed to sign in. Please verify your credentials.');
+      if (res.ok) {
+        router.push(redirectPath);
+        router.refresh();
         return;
       }
-
-      // Successful login -> Navigate to user dashboard
-      router.push(redirectPath);
-      router.refresh();
     } catch (err: any) {
-      console.error(err);
-      setError('A connection error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+      // Fallback to client-side auth on static hosts like GitHub Pages
     }
+
+    if (loginEmail === 'student@greenmind.demo' && loginPass === 'student123') {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('gm_client_role', 'user');
+        localStorage.setItem('gm_client_user', JSON.stringify({
+          id: 'user-001',
+          name: 'Elakkiyan (Student Auditor)',
+          email: 'student@greenmind.demo',
+          role: 'user',
+          department: 'Computer Science',
+        }));
+      }
+      router.push(redirectPath);
+      return;
+    }
+
+    setError('Failed to sign in. Please verify your credentials.');
+    setLoading(false);
   };
 
   const handleDemoStudentLogin = () => {

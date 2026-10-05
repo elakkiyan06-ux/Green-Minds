@@ -59,20 +59,32 @@ function AdminLoginContent() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.error || 'Failed to sign in. Please verify your administrative credentials.');
+      if (res.ok) {
+        router.push(redirectPath);
+        router.refresh();
         return;
       }
-
-      // Successful login -> Navigate to admin dashboard
-      router.push(redirectPath);
-      router.refresh();
     } catch (err: any) {
-      console.error(err);
-      setError('A connection error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+      // Fallback to client-side auth on static hosts like GitHub Pages
     }
+
+    if (loginEmail === 'admin@greenmind.demo' && loginPass === 'admin123') {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('gm_client_role', 'admin');
+        localStorage.setItem('gm_client_user', JSON.stringify({
+          id: 'admin-001',
+          name: 'Campus Facility Operations',
+          email: 'admin@greenmind.demo',
+          role: 'admin',
+          department: 'Facilities General',
+        }));
+      }
+      router.push(redirectPath);
+      return;
+    }
+
+    setError('Failed to sign in. Please verify your administrative credentials.');
+    setLoading(false);
   };
 
   const handleDemoAdminLogin = () => {
