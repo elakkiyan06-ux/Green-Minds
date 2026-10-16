@@ -6,15 +6,17 @@ import {
 } from './types';
 
 export interface TariffSettings {
-  electricityPerKWh: number; // in INR ₹
-  waterPer1000L: number;     // in INR ₹
-  wastePerKg: number;        // in INR ₹
+  electricityPerKWh: number; // in INR ₹ (₹6/kWh)
+  waterPer1000L: number;     // in INR ₹ (₹500 per 1,000 Liters)
+  waterPerLiter?: number;    // in INR ₹ (₹0.50 per Liter)
+  wastePerKg: number;        // in INR ₹ (₹5/kg)
 }
 
 export const DEFAULT_TARIFFS: TariffSettings = {
-  electricityPerKWh: 8.0,  // Standard commercial / institutional tariff in India (~₹8/kWh)
-  waterPer1000L: 35.0,     // Institutional municipal supply tariff (~₹35 per 1,000 Liters)
-  wastePerKg: 12.0,        // Solid waste handling & sorting cost (~₹12/kg)
+  electricityPerKWh: 6.0,  // Campus electricity tariff: ₹6/kWh
+  waterPer1000L: 500.0,    // Campus water tariff: ₹0.50 per liter (₹500 per 1,000 Liters)
+  waterPerLiter: 0.50,     // ₹0.50 per liter
+  wastePerKg: 5.0,         // Solid waste & plastic handling cost: ₹5/kg
 };
 
 /**
@@ -31,13 +33,14 @@ export function estimateResourceImpact(
 ): ResourceImpactEstimate {
   const text = `${title} ${description}`.toLowerCase();
   const cat = (category || '').toLowerCase();
+  const hasAc = /\b(ac|a\/c|air\s*condition(?:er|ing)?|hvac)\b/i.test(text);
 
   // 1. ENERGY IMPACT ESTIMATION
-  if (cat === 'energy' || text.includes('light') || text.includes('fan') || text.includes('ac') || text.includes('power') || text.includes('spotlight') || text.includes('electricity')) {
+  if (cat === 'energy' || text.includes('light') || text.includes('fan') || hasAc || text.includes('spotlight') || text.includes('electricity')) {
     let assumedKW = 1.2; // default: standard classroom with lights and fans
     let durationHours = customDurationHours ?? 2.0;
 
-    if (text.includes('ac') || text.includes('air condition')) {
+    if (hasAc) {
       assumedKW = 2.4; // 1.5 - 2.0 ton split AC load
       durationHours = customDurationHours ?? 3.0;
     } else if (text.includes('spotlight') || text.includes('halogen')) {
@@ -69,12 +72,12 @@ export function estimateResourceImpact(
       tariffRate: tariffs.electricityPerKWh,
       isEstimated: true,
       basis: 'Based on configurable assumptions',
-      notes: `Assumed load: ${assumedKW} kW for estimated duration of ${durationHours} hrs at institutional tariff of ₹${tariffs.electricityPerKWh}/kWh.`
+      notes: `Assumed load: ${assumedKW} kW for estimated duration of ${durationHours} hrs at campus tariff of ₹${tariffs.electricityPerKWh}/kWh.`
     };
   }
 
   // 2. WATER IMPACT ESTIMATION
-  if (cat === 'water' || text.includes('water') || text.includes('leak') || text.includes('pipe') || text.includes('tap') || text.includes('hose') || text.includes('faucet')) {
+  if (cat === 'water' || text.includes('water') || text.includes('leak') || text.includes('pipe') || text.includes('tap') || text.includes('hose') || text.includes('faucet') || text.includes('plumb') || text.includes('drip') || text.includes('seepage') || text.includes('puddle')) {
     let assumedLitersPerHour = 30; // standard leaking tap / joint
     let durationHours = customDurationHours ?? 4.0;
 
@@ -94,7 +97,8 @@ export function estimateResourceImpact(
     }
 
     const calculatedLiters = Math.round(assumedLitersPerHour * durationHours);
-    const cost = Number(((calculatedLiters / 1000) * tariffs.waterPer1000L).toFixed(2));
+    const waterRatePerLiter = tariffs.waterPerLiter ?? (tariffs.waterPer1000L ? tariffs.waterPer1000L / 1000 : 0.50);
+    const cost = Number((calculatedLiters * waterRatePerLiter).toFixed(2));
 
     return {
       category: 'Water',
@@ -106,11 +110,11 @@ export function estimateResourceImpact(
       assumedDurationHours: durationHours,
       calculatedResourceQuantity: calculatedLiters,
       resourceUnit: 'Liters',
-      appliedTariff: `₹${tariffs.waterPer1000L.toFixed(2)} / 1,000 L`,
-      tariffRate: tariffs.waterPer1000L,
+      appliedTariff: `₹${waterRatePerLiter.toFixed(2)} / Liter`,
+      tariffRate: waterRatePerLiter,
       isEstimated: true,
       basis: 'Based on configurable assumptions',
-      notes: `Assumed flow rate: ${assumedLitersPerHour} L/hr over ${durationHours} hrs at municipal rate of ₹${tariffs.waterPer1000L}/1,000 L.`
+      notes: `Assumed flow rate: ${assumedLitersPerHour} L/hr over ${durationHours} hrs at campus tariff of ₹${waterRatePerLiter.toFixed(2)}/Liter (₹${(waterRatePerLiter * 1000).toFixed(0)}/1,000 L).`
     };
   }
 
@@ -146,7 +150,7 @@ export function estimateResourceImpact(
     tariffRate: tariffs.wastePerKg,
     isEstimated: true,
     basis: 'Based on configurable assumptions',
-    notes: `Assumed unsegregated/diverted mass of ${assumedKg} kg at institutional sorting and disposal rate of ₹${tariffs.wastePerKg}/kg.`
+    notes: `Assumed unsegregated/diverted mass of ${assumedKg} kg at campus sorting and disposal rate of ₹${tariffs.wastePerKg}/kg.`
   };
 }
 
@@ -161,6 +165,8 @@ export function calculateAggregateImpact(
   let totalWaterLiters = 0;
   let totalWasteKg = 0;
   let totalCost = 0;
+
+  const waterRatePerLiter = tariffs.waterPerLiter ?? (tariffs.waterPer1000L ? tariffs.waterPer1000L / 1000 : 0.50);
 
   issues.forEach(issue => {
     const est = issue.impact_estimate || estimateResourceImpact(issue.category, issue.title, issue.description, undefined, undefined, tariffs);
@@ -181,7 +187,12 @@ export function calculateAggregateImpact(
     potentialWaterLiters: Math.round(totalWaterLiters),
     potentialWasteKg: Number(totalWasteKg.toFixed(1)),
     estimatedTotalCost: Number(totalCost.toFixed(2)),
-    tariffs,
+    tariffs: {
+      electricityPerKWh: tariffs.electricityPerKWh,
+      waterPer1000L: tariffs.waterPer1000L,
+      waterPerLiter: waterRatePerLiter,
+      wastePerKg: tariffs.wastePerKg,
+    },
     isEstimated: true,
     basis: 'Based on configurable assumptions'
   };

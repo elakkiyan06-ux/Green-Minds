@@ -99,20 +99,24 @@ export default function UserIssuesPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header Bar */}
+      <div className="bg-white border border-[#E5EBE5] p-6 rounded-3xl text-gray-900 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mb-2">
+            <MapPin className="w-3.5 h-3.5 text-[#16A34A]" />
+            Environmental Issues Registry
+          </div>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
             My Environmental Reports
           </h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">
             Track repairs, verification status, and eco-bounty points for reported issues.
           </p>
         </div>
 
         <Link
           href="/user/report"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#16A34A] hover:bg-[#14532D] text-white text-xs sm:text-sm font-bold shadow-sm shadow-green-700/20 transition-all duration-150 self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-xs sm:text-sm font-bold shadow-md shadow-green-900/10 transition-all self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Report New Issue</span>
@@ -120,13 +124,13 @@ export default function UserIssuesPage() {
       </div>
 
       {/* View Scope Toggle */}
-      <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl max-w-xs">
+      <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl max-w-xs border border-gray-200">
         <button
           onClick={() => setViewScope('my')}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
             viewScope === 'my'
-              ? 'bg-white text-gray-900 shadow-xs'
-              : 'text-gray-500 hover:text-gray-900'
+              ? 'bg-[#16A34A] text-white shadow-xs'
+              : 'text-gray-600 hover:text-gray-900'
           }`}
         >
           My Reports
@@ -135,8 +139,8 @@ export default function UserIssuesPage() {
           onClick={() => setViewScope('campus')}
           className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all ${
             viewScope === 'campus'
-              ? 'bg-white text-gray-900 shadow-xs'
-              : 'text-gray-500 hover:text-gray-900'
+              ? 'bg-[#16A34A] text-white shadow-xs'
+              : 'text-gray-600 hover:text-gray-900'
           }`}
         >
           Campus Feed
@@ -153,26 +157,26 @@ export default function UserIssuesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search reports by title, location, or department..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-xs sm:text-sm focus:outline-none focus:border-[#16A34A] transition-colors"
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 bg-[#F8FAF8] text-gray-900 text-xs sm:text-sm focus:outline-none focus:border-[#16A34A] transition-colors placeholder:text-gray-400"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2 rounded-xl bg-gray-900 hover:bg-black text-white text-xs font-bold transition-colors"
+            className="px-4 py-2 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold transition-colors"
           >
             Search
           </button>
         </form>
 
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100 text-xs">
-          <span className="text-gray-400 font-semibold flex items-center gap-1 mr-1">
+          <span className="text-gray-600 font-semibold flex items-center gap-1 mr-1">
             <SlidersHorizontal className="w-3.5 h-3.5" /> Filters:
           </span>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 bg-white font-medium focus:outline-none focus:border-[#16A34A]"
+            className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-800 bg-[#F8FAF8] font-medium focus:outline-none focus:border-[#16A34A]"
           >
             {statuses.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
@@ -180,7 +184,7 @@ export default function UserIssuesPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 bg-white font-medium focus:outline-none focus:border-[#16A34A]"
+            className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-800 bg-[#F8FAF8] font-medium focus:outline-none focus:border-[#16A34A]"
           >
             {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
@@ -194,11 +198,11 @@ export default function UserIssuesPage() {
           <p className="text-xs text-gray-500">Loading reports...</p>
         </div>
       ) : displayedIssues.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300 space-y-3">
-          <p className="text-sm font-semibold text-gray-700">No reports found matching your criteria.</p>
+        <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-[#E5EBE5] space-y-3 shadow-xs">
+          <p className="text-sm font-semibold text-gray-600">No reports found matching your criteria.</p>
           <Link
             href="/user/report"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#16A34A] text-white text-xs font-bold"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#16A34A] text-white text-xs font-bold shadow-xs hover:bg-[#15803D]"
           >
             <Plus className="w-4 h-4" /> Report an Environmental Issue
           </Link>
@@ -209,7 +213,7 @@ export default function UserIssuesPage() {
             <Link
               key={issue.id}
               href={`/user/issues/${issue.id}`}
-              className="bg-white rounded-2xl p-5 border border-[#E5EBE5] hover:border-emerald-300 shadow-xs hover:shadow-md transition-all group flex flex-col justify-between"
+              className="bg-white rounded-2xl p-5 border border-[#E5EBE5] hover:border-[#16A34A] hover:shadow-md transition-all group flex flex-col justify-between"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
@@ -224,16 +228,16 @@ export default function UserIssuesPage() {
                   <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#16A34A] transition-colors line-clamp-1">
                     {issue.title}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                     {issue.description || issue.ai_summary}
                   </p>
                 </div>
               </div>
 
               <div className="pt-4 mt-3 border-t border-gray-100 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-3 text-gray-400">
-                  <span className="flex items-center gap-1 font-mono text-[11px]">
-                    <MapPin className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-3 text-gray-500">
+                  <span className="flex items-center gap-1 font-mono text-[11px] text-gray-700">
+                    <MapPin className="w-3.5 h-3.5 text-[#16A34A]" />
                     {issue.location}
                   </span>
                   <span className="flex items-center gap-1 text-[11px]">
@@ -244,8 +248,8 @@ export default function UserIssuesPage() {
 
                 <div className="flex items-center gap-2">
                   {issue.eco_bounty_eligible && (
-                    <span className="text-[11px] font-bold text-[#16A34A] flex items-center gap-1">
-                      <Trophy className="w-3 h-3" />
+                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Trophy className="w-3 h-3 text-amber-500" />
                       +{issue.eco_bounty_points || 50} pts
                     </span>
                   )}

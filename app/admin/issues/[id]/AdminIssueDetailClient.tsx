@@ -148,10 +148,10 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
   if (!issue) {
     return (
       <div className="py-20 text-center space-y-4">
-        <p className="text-base font-bold text-white">Environmental report not found.</p>
+        <p className="text-base font-bold text-gray-900">Environmental report not found.</p>
         <Link
           href="/admin/issues"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-gray-950 text-xs font-bold"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Return to Issues
         </Link>
@@ -160,55 +160,55 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 pb-16">
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 pb-16 text-gray-900">
       {/* Top Breadcrumb */}
-      <div className="flex items-center justify-between pb-2 border-b border-emerald-900/50">
+      <div className="flex items-center justify-between pb-2 border-b border-gray-100">
         <Link
           href="/admin/issues"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-300 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to All Issues</span>
         </Link>
 
-        <span className="text-xs font-mono text-emerald-400">
+        <span className="text-xs font-mono font-bold text-[#16A34A] bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
           Admin Ticket #{issue.id}
         </span>
       </div>
 
       {/* Success / Error Alerts */}
       {toastMessage && (
-        <div className="p-4 rounded-2xl bg-emerald-950 border border-emerald-500 text-emerald-200 flex items-center gap-3 animate-in fade-in duration-200">
-          <Check className="w-5 h-5 text-emerald-400 shrink-0" />
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center gap-3 animate-in fade-in duration-200 shadow-xs">
+          <Check className="w-5 h-5 text-[#16A34A] shrink-0" />
           <span className="text-xs font-semibold">{toastMessage}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-red-950 border border-red-500 text-red-200 flex items-center gap-3 animate-in fade-in duration-200">
-          <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 flex items-center gap-3 animate-in fade-in duration-200 shadow-xs">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
           <span className="text-xs font-semibold">{errorMessage}</span>
         </div>
       )}
 
       {/* Admin Operations Control Box */}
-      <div className="bg-[#122419] rounded-3xl p-6 sm:p-8 border border-emerald-500/30 shadow-xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-emerald-900/50">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5EBE5] shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#16A34A] border border-emerald-200 flex items-center justify-center">
               <Wrench className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-black text-white">Maintenance Dispatch & Status Control</h2>
-              <p className="text-xs text-emerald-300/70">Assign campus maintenance departments and log resolution reports</p>
+              <h2 className="text-base font-black text-gray-900">Maintenance Dispatch & Status Control</h2>
+              <p className="text-xs text-gray-500">Assign campus maintenance departments and log resolution reports</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-              issue.status === 'resolved' ? 'bg-teal-950 text-teal-300 border border-teal-800' :
-              issue.status === 'in_progress' ? 'bg-blue-950 text-blue-300 border border-blue-800' :
-              'bg-amber-950 text-amber-300 border border-amber-800'
+              issue.status === 'resolved' ? 'bg-teal-50 text-teal-800 border border-teal-200' :
+              issue.status === 'in_progress' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
+              'bg-amber-50 text-amber-800 border border-amber-200'
             }`}>
               Current: {issue.status.replace('_', ' ').toUpperCase()}
             </span>
@@ -218,18 +218,18 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Department Selector */}
           <div>
-            <label className="block text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
               Assign Maintenance Department
             </label>
             <div className="relative">
-              <Building2 className="w-4 h-4 text-emerald-400 absolute left-3.5 top-3" />
+              <Building2 className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
               <select
                 value={assignedDepartment}
                 onChange={(e) => setAssignedDepartment(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0A160F] border border-emerald-500/40 text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 transition-colors"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#F8FAF8] border border-gray-200 text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#16A34A] transition-colors"
               >
                 {DEPARTMENTS.map((dept) => (
-                  <option key={dept} value={dept} className="bg-[#0A160F] text-white">
+                  <option key={dept} value={dept}>
                     {dept}
                   </option>
                 ))}
@@ -239,13 +239,13 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
 
           {/* Status Selector */}
           <div>
-            <label className="block text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
               Incident Status
             </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as IssueStatus)}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#0A160F] border border-emerald-500/40 text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 transition-colors"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#F8FAF8] border border-gray-200 text-sm font-semibold text-gray-900 focus:outline-none focus:border-[#16A34A] transition-colors"
             >
               <option value="open">Reported / Open</option>
               <option value="ai_verified">AI Verified</option>
@@ -258,7 +258,7 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
 
         {/* Resolution Notes */}
         <div>
-          <label className="block text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
             Maintenance Technician Notes & Resolution Log
           </label>
           <textarea
@@ -266,7 +266,7 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
             value={resolutionNotes}
             onChange={(e) => setResolutionNotes(e.target.value)}
             placeholder="Add details on maintenance technician dispatched, repair parts replaced, or preventive plumbing/electrical actions completed..."
-            className="w-full px-4 py-2.5 rounded-xl bg-[#0A160F] border border-emerald-500/40 text-sm text-white placeholder-emerald-800 focus:outline-none focus:border-emerald-400"
+            className="w-full px-4 py-2.5 rounded-xl bg-[#F8FAF8] border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#16A34A]"
           />
         </div>
 
@@ -281,7 +281,7 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
                   handleSaveManagementUpdates('resolved');
                 }}
                 disabled={updating}
-                className="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-gray-950 text-xs font-black transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-2xs"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Mark as Resolved</span>
@@ -293,7 +293,7 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
             type="button"
             onClick={() => handleSaveManagementUpdates()}
             disabled={updating}
-            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-gray-950 text-xs font-black shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-2.5 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-2 disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             <span>{updating ? 'Saving Changes...' : 'Save Management Updates'}</span>
@@ -302,65 +302,65 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
       </div>
 
       {/* Issue Overview Card */}
-      <div className="bg-[#122419] rounded-3xl p-6 sm:p-8 border border-emerald-500/20 shadow-xl space-y-5">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5EBE5] shadow-xs space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs font-bold uppercase">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold uppercase">
               {issue.category}
             </span>
             <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-              issue.severity === 'critical' ? 'bg-red-950 text-red-300 border border-red-800' :
-              issue.severity === 'high' ? 'bg-amber-950 text-amber-300 border border-amber-800' :
-              'bg-emerald-950 text-emerald-300 border border-emerald-800'
+              issue.severity === 'critical' ? 'bg-red-50 text-red-700 border border-red-200' :
+              issue.severity === 'high' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+              'bg-emerald-50 text-emerald-800 border border-emerald-200'
             }`}>
               Severity: {issue.severity.toUpperCase()}
             </span>
             {issue.ai_verified && (
-              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#16A34A]" />
                 Gemini Vision Verified
               </span>
             )}
           </div>
 
-          <span className="text-xs text-emerald-300/80 font-mono">
+          <span className="text-xs text-gray-500 font-mono">
             Reported by: {issue.reported_by || 'Student Auditor'}
           </span>
         </div>
 
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
             {issue.title}
           </h1>
-          <p className="text-sm text-emerald-100/80 mt-2 leading-relaxed">
+          <p className="text-sm text-gray-600 mt-2 leading-relaxed">
             {issue.description}
           </p>
         </div>
 
         {/* Location & Metadata */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-emerald-900/40 text-xs text-emerald-200/80">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-100 text-xs text-gray-600">
           <div>
-            <span className="block text-[10px] text-emerald-400 uppercase font-bold">Location</span>
-            <span className="font-semibold text-white">{issue.location}</span>
+            <span className="block text-[10px] text-gray-400 uppercase font-bold">Location</span>
+            <span className="font-semibold text-gray-900">{issue.location}</span>
           </div>
           <div>
-            <span className="block text-[10px] text-emerald-400 uppercase font-bold">Logged At</span>
-            <span className="font-semibold text-white">{new Date(issue.created_at).toLocaleString()}</span>
+            <span className="block text-[10px] text-gray-400 uppercase font-bold">Logged At</span>
+            <span className="font-semibold text-gray-900">{new Date(issue.created_at).toLocaleString()}</span>
           </div>
           <div>
-            <span className="block text-[10px] text-emerald-400 uppercase font-bold">Department</span>
-            <span className="font-semibold text-emerald-300">{issue.assigned_department || 'Unassigned'}</span>
+            <span className="block text-[10px] text-gray-400 uppercase font-bold">Department</span>
+            <span className="font-semibold text-emerald-800">{issue.assigned_department || 'Unassigned'}</span>
           </div>
           <div>
-            <span className="block text-[10px] text-emerald-400 uppercase font-bold">Eco-Bounty</span>
-            <span className="font-semibold text-emerald-300">+{issue.eco_bounty_points || 50} pts awarded</span>
+            <span className="block text-[10px] text-gray-400 uppercase font-bold">Eco-Bounty</span>
+            <span className="font-semibold text-emerald-800">+{issue.eco_bounty_points || 50} pts awarded</span>
           </div>
         </div>
       </div>
 
       {/* Issue Photo if provided */}
       {issue.image_url && (
-        <div className="bg-[#122419] rounded-3xl p-4 border border-emerald-500/20 overflow-hidden shadow-xl">
+        <div className="bg-white rounded-3xl p-4 border border-[#E5EBE5] overflow-hidden shadow-xs">
           <img
             src={issue.image_url}
             alt={issue.title}
@@ -385,28 +385,28 @@ export default function AdminIssueDetailClient({ id }: { id: string }) {
 
       {/* AI Observations and Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-[#122419] rounded-3xl p-6 border border-emerald-500/20 shadow-xl space-y-3">
-          <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+        <div className="bg-white rounded-3xl p-6 border border-[#E5EBE5] shadow-xs space-y-3">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
             AI OBSERVATIONS & EVIDENCE
           </h3>
           <div className="space-y-2">
             {(issue.ai_observations || []).map((obs, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs text-emerald-100 p-2.5 rounded-xl bg-[#0A160F] border border-emerald-900/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 mt-1.5" />
+              <div key={idx} className="flex items-start gap-2 text-xs text-gray-800 p-2.5 rounded-xl bg-[#F8FAF8] border border-gray-100">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] shrink-0 mt-1.5" />
                 <span>{obs}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-[#122419] rounded-3xl p-6 border border-emerald-500/20 shadow-xl space-y-3">
-          <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+        <div className="bg-white rounded-3xl p-6 border border-[#E5EBE5] shadow-xs space-y-3">
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
             PREVENTIVE ACTIONS FOR MAINTENANCE
           </h3>
           <div className="space-y-2">
             {(issue.ai_preventive_actions || []).map((act, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs text-emerald-100 p-2.5 rounded-xl bg-[#0A160F] border border-emerald-900/30">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div key={idx} className="flex items-start gap-2 text-xs text-gray-800 p-2.5 rounded-xl bg-[#F8FAF8] border border-gray-100">
+                <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
                 <span>{act}</span>
               </div>
             ))}

@@ -48,17 +48,17 @@ export default function ResourceImpactCard({
   const isWater = base.category === 'Water';
 
   return (
-    <div className="bg-gradient-to-br from-amber-50/50 via-white to-orange-50/30 rounded-2xl p-6 border border-amber-200/90 shadow-xs space-y-4">
+    <div className="bg-white rounded-2xl p-6 border border-[#E5EBE5] shadow-xs space-y-4 text-gray-900">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-100 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
+          <div className="p-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-600">
             {isEnergy ? <Zap className="w-5 h-5 text-amber-600" /> :
              isWater ? <Droplet className="w-5 h-5 text-blue-600" /> :
-             <Trash2 className="w-5 h-5 text-emerald-600" />}
+             <Trash2 className="w-5 h-5 text-[#16A34A]" />}
           </div>
           <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 block">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 block">
               Resource Impact Estimator
             </span>
             <h3 className="text-base font-black text-gray-900 tracking-tight flex items-center gap-1.5">
@@ -70,7 +70,7 @@ export default function ResourceImpactCard({
         <button
           type="button"
           onClick={() => setShowAdjust(!showAdjust)}
-          className="text-xs font-semibold text-amber-900 hover:text-amber-700 bg-amber-100/70 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 self-start sm:self-auto"
+          className="text-xs font-bold text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 self-start sm:self-auto shadow-2xs"
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
           <span>{showAdjust ? 'Hide Adjustment' : 'Adjust Assumptions'}</span>
@@ -80,8 +80,8 @@ export default function ResourceImpactCard({
       {/* Main 2-Value Display */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Resource Value */}
-        <div className="p-4 rounded-xl bg-white border border-amber-200/80 shadow-2xs">
-          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+        <div className="p-4 rounded-xl bg-[#F8FAF8] border border-gray-200 shadow-2xs">
+          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
             {isEnergy ? 'Estimated Energy:' : isWater ? 'Estimated Water:' : 'Estimated Waste:'}
           </span>
           <span className="text-2xl font-black text-gray-900 font-mono mt-1 block">
@@ -93,8 +93,8 @@ export default function ResourceImpactCard({
         </div>
 
         {/* Cost Value */}
-        <div className="p-4 rounded-xl bg-white border border-amber-200/80 shadow-2xs">
-          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">
+        <div className="p-4 rounded-xl bg-[#F8FAF8] border border-amber-200 shadow-2xs">
+          <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider block">
             Estimated Cost:
           </span>
           <span className="text-2xl font-black text-amber-700 font-mono mt-1 block">
@@ -108,15 +108,15 @@ export default function ResourceImpactCard({
 
       {/* Optional Interactive Adjustment Sliders */}
       {showAdjust && (
-        <div className="p-4 rounded-xl bg-white/90 border border-gray-200 space-y-3 animate-in slide-in-from-top-1 duration-150">
-          <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider block">
+        <div className="p-4 rounded-xl bg-[#F8FAF8] border border-amber-200 space-y-3 animate-in slide-in-from-top-1 duration-150">
+          <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider block">
             Configure Incident Assumptions:
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <div className="flex justify-between text-xs font-semibold text-gray-700 mb-1">
                 <span>Assumed {isEnergy ? 'Load (kW)' : isWater ? 'Flow Rate (L/hr)' : 'Mass (kg)'}:</span>
-                <span className="font-mono">{loadValue} {isEnergy ? 'kW' : isWater ? 'L/hr' : 'kg'}</span>
+                <span className="font-mono text-amber-700">{loadValue} {isEnergy ? 'kW' : isWater ? 'L/hr' : 'kg'}</span>
               </div>
               <input
                 type="range"
@@ -125,14 +125,14 @@ export default function ResourceImpactCard({
                 step={isEnergy ? 0.1 : isWater ? 5 : 1}
                 value={loadValue}
                 onChange={(e) => setLoadValue(parseFloat(e.target.value))}
-                className="w-full accent-amber-600"
+                className="w-full accent-[#16A34A]"
               />
             </div>
 
             <div>
               <div className="flex justify-between text-xs font-semibold text-gray-700 mb-1">
                 <span>Estimated Duration:</span>
-                <span className="font-mono">{durationHours} hours</span>
+                <span className="font-mono text-amber-700">{durationHours} hours</span>
               </div>
               <input
                 type="range"
@@ -141,7 +141,7 @@ export default function ResourceImpactCard({
                 step={0.5}
                 value={durationHours}
                 onChange={(e) => setDurationHours(parseFloat(e.target.value))}
-                className="w-full accent-amber-600"
+                className="w-full accent-[#16A34A]"
               />
             </div>
           </div>
@@ -149,36 +149,36 @@ export default function ResourceImpactCard({
       )}
 
       {/* Transparent Calculation Breakdown Box */}
-      <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/60 text-xs space-y-1.5 font-medium text-amber-950">
-        <div className="font-bold flex items-center justify-between text-[11px] text-amber-900 uppercase">
+      <div className="p-3.5 rounded-xl bg-[#F8FAF8] border border-gray-200 text-xs space-y-1.5 font-medium text-gray-800">
+        <div className="font-bold flex items-center justify-between text-[11px] text-amber-800 uppercase">
           <span>Calculation Methodology</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 font-bold">Transparent</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 font-bold">Transparent</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-[11px]">
           <div>
             <span className="text-gray-500 block text-[9px] uppercase font-sans">Assumed Load:</span>
-            <span>{recalculated.assumedLoadOrRate}</span>
+            <span className="text-gray-900 font-bold">{recalculated.assumedLoadOrRate}</span>
           </div>
           <div>
             <span className="text-gray-500 block text-[9px] uppercase font-sans">Estimated Duration:</span>
-            <span>{recalculated.assumedDurationHours} hours</span>
+            <span className="text-gray-900 font-bold">{recalculated.assumedDurationHours} hours</span>
           </div>
           <div>
             <span className="text-gray-500 block text-[9px] uppercase font-sans">
               {isEnergy ? 'Estimated Energy:' : isWater ? 'Estimated Water:' : 'Estimated Waste:'}
             </span>
-            <span className="font-bold">{recalculated.potentialResourceImpact}</span>
+            <span className="font-bold text-gray-900">{recalculated.potentialResourceImpact}</span>
           </div>
           <div>
             <span className="text-gray-500 block text-[9px] uppercase font-sans">Estimated Cost:</span>
-            <span className="font-bold text-amber-800">{recalculated.formattedCost}</span>
+            <span className="font-bold text-amber-700">{recalculated.formattedCost}</span>
           </div>
         </div>
       </div>
 
       {/* Mandatory Regulatory / Responsible AI Footer Label */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-gray-500 border-t border-amber-100 pt-2">
-        <span className="font-semibold text-amber-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px] text-gray-500 border-t border-gray-100 pt-2">
+        <span className="font-semibold text-amber-700">
           • Label: Estimated • Based on configurable assumptions
         </span>
         <span className="italic">

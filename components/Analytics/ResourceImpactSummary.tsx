@@ -31,7 +31,8 @@ export default function ResourceImpactSummary({ initialAggregate }: ResourceImpa
 
   // Dynamic recalculation on the fly based on configurable tariff inputs
   const calculatedEnergyCost = Number((baseEnergyKWh * tariffs.electricityPerKWh).toFixed(2));
-  const calculatedWaterCost = Number(((baseWaterLiters / 1000) * tariffs.waterPer1000L).toFixed(2));
+  const waterRate = tariffs.waterPerLiter ?? (tariffs.waterPer1000L ? tariffs.waterPer1000L / 1000 : 0.50);
+  const calculatedWaterCost = Number((baseWaterLiters * waterRate).toFixed(2));
   const calculatedWasteCost = Number((baseWasteKg * tariffs.wastePerKg).toFixed(2));
   const totalEstimatedCost = Number((calculatedEnergyCost + calculatedWaterCost + calculatedWasteCost).toFixed(2));
 
@@ -112,34 +113,35 @@ export default function ResourceImpactSummary({ initialAggregate }: ResourceImpa
                 }
                 className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white text-xs font-bold text-gray-900 focus:outline-none focus:border-[#16A34A]"
               />
-              <span className="text-[10px] text-gray-400 mt-1 block">Institutional HT supply default: ₹8.00</span>
+              <span className="text-[10px] text-gray-400 mt-1 block">Campus power rate: ₹6.00 / kWh</span>
             </div>
 
             <div>
               <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">
-                Water Cost (₹ / 1,000 Liters)
+                Water Cost (₹ / Liter)
               </label>
               <input
                 type="number"
-                step="5"
-                min="5"
-                max="150"
-                value={tariffs.waterPer1000L}
-                onChange={(e) =>
-                  setTariffs({ ...tariffs, waterPer1000L: parseFloat(e.target.value) || 0 })
-                }
+                step="0.05"
+                min="0.01"
+                max="20"
+                value={tariffs.waterPerLiter ?? (tariffs.waterPer1000L ? tariffs.waterPer1000L / 1000 : 0.50)}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value) || 0;
+                  setTariffs({ ...tariffs, waterPerLiter: val, waterPer1000L: val * 1000 });
+                }}
                 className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white text-xs font-bold text-gray-900 focus:outline-none focus:border-[#16A34A]"
               />
-              <span className="text-[10px] text-gray-400 mt-1 block">Municipal commercial rate: ₹35.00</span>
+              <span className="text-[10px] text-gray-400 mt-1 block">Campus water rate: ₹0.50 / Liter (₹500 / 1,000 L)</span>
             </div>
 
             <div>
               <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1">
-                Waste Handling (₹ / kg)
+                Plastic & Waste Handling (₹ / kg)
               </label>
               <input
                 type="number"
-                step="1"
+                step="0.5"
                 min="1"
                 max="50"
                 value={tariffs.wastePerKg}
@@ -148,7 +150,7 @@ export default function ResourceImpactSummary({ initialAggregate }: ResourceImpa
                 }
                 className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white text-xs font-bold text-gray-900 focus:outline-none focus:border-[#16A34A]"
               />
-              <span className="text-[10px] text-gray-400 mt-1 block">Segregation & tipping fee: ₹12.00</span>
+              <span className="text-[10px] text-gray-400 mt-1 block">Campus plastic & waste rate: ₹5.00 / kg</span>
             </div>
           </div>
         </div>
@@ -176,9 +178,10 @@ export default function ResourceImpactSummary({ initialAggregate }: ResourceImpa
             <span className="text-gray-500">Estimated Cost:</span>
             <span className="font-bold text-amber-900 font-mono">₹{calculatedEnergyCost.toLocaleString()}</span>
           </div>
-          <span className="text-[10px] text-gray-400 block italic">
-            Estimated • Based on configurable assumptions
-          </span>
+          <div className="flex items-center justify-between text-[10px] text-gray-500">
+            <span className="italic">Estimated • Configurable</span>
+            <span className="font-bold text-amber-800 font-mono">@ ₹{tariffs.electricityPerKWh.toFixed(2)}/kWh</span>
+          </div>
         </div>
 
         {/* Card 2: Water Impact */}
@@ -201,9 +204,10 @@ export default function ResourceImpactSummary({ initialAggregate }: ResourceImpa
             <span className="text-gray-500">Estimated Cost:</span>
             <span className="font-bold text-blue-900 font-mono">₹{calculatedWaterCost.toLocaleString()}</span>
           </div>
-          <span className="text-[10px] text-gray-400 block italic">
-            Estimated • Based on configurable assumptions
-          </span>
+          <div className="flex items-center justify-between text-[10px] text-gray-500">
+            <span className="italic">Estimated • Configurable</span>
+            <span className="font-bold text-blue-800 font-mono">@ ₹{waterRate.toFixed(2)}/Liter</span>
+          </div>
         </div>
 
         {/* Card 3: Waste Impact */}
@@ -226,9 +230,10 @@ export default function ResourceImpactSummary({ initialAggregate }: ResourceImpa
             <span className="text-gray-500">Disposal Cost:</span>
             <span className="font-bold text-emerald-900 font-mono">₹{calculatedWasteCost.toLocaleString()}</span>
           </div>
-          <span className="text-[10px] text-gray-400 block italic">
-            Estimated • Based on configurable assumptions
-          </span>
+          <div className="flex items-center justify-between text-[10px] text-gray-500">
+            <span className="italic">Estimated • Configurable</span>
+            <span className="font-bold text-emerald-800 font-mono">@ ₹{tariffs.wastePerKg.toFixed(2)}/kg</span>
+          </div>
         </div>
 
         {/* Card 4: Total Cost Impact */}

@@ -17,10 +17,10 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
     return <>{children}</>;
   }
 
-  // 2. Admin Portal routes: Dark professional management style
+  // 2. Admin Portal routes: Clean white student portal theme with emerald accents
   if (pathname?.startsWith('/admin')) {
     return (
-      <div className="flex min-h-screen bg-[#0A160F] text-gray-100 antialiased selection:bg-emerald-500 selection:text-black">
+      <div className="flex min-h-screen bg-[#F8FAF8] text-gray-900 antialiased selection:bg-[#16A34A] selection:text-white">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
           <AdminHeader />
@@ -33,9 +33,9 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // 3. User / Student Portal routes: Friendly, clean sustainability green theme
+  // 3. User / Student Portal routes: Clean white student portal theme with emerald accents
   return (
-    <div className="flex min-h-screen bg-[#F7FAF7] text-[#172017] antialiased">
+    <div className="flex min-h-screen bg-[#F8FAF8] text-gray-900 antialiased selection:bg-[#16A34A] selection:text-white">
       <UserSidebar />
       <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
         <UserHeader />

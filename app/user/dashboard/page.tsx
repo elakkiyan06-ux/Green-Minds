@@ -22,14 +22,18 @@ import {
   Coins
 } from 'lucide-react';
 
+import { getStudentPoints } from '@/lib/student-points';
+
 function UserDashboardContent() {
   const searchParams = useSearchParams();
   const accessError = searchParams.get('error') === 'admin_access_denied';
 
   const [issues, setIssues] = useState<EnvironmentalIssue[]>([]);
+  const [ecoPoints, setEcoPoints] = useState<number>(1240);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadDashboardData = () => {
+    setEcoPoints(getStudentPoints());
     fetch('/api/issues')
       .then((res) => res.json())
       .then((data) => {
@@ -39,6 +43,41 @@ function UserDashboardContent() {
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
+
+    fetch('/api/eco-bounty')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.stats?.myPoints) {
+          const currentLocal = getStudentPoints();
+          if (data.stats.myPoints > currentLocal) {
+            setEcoPoints(data.stats.myPoints);
+          }
+        }
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+
+    const handlePointsUpdate = () => {
+      setEcoPoints(getStudentPoints());
+      // Refresh issues list in case new report was just added
+      fetch('/api/issues')
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) setIssues(data);
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener('eco_points_updated', handlePointsUpdate);
+    window.addEventListener('storage', handlePointsUpdate);
+
+    return () => {
+      window.removeEventListener('eco_points_updated', handlePointsUpdate);
+      window.removeEventListener('storage', handlePointsUpdate);
+    };
   }, []);
 
   // Filter student's reports: reports by Elakkiyan or student auditor (or top issues for demo)
@@ -56,10 +95,10 @@ function UserDashboardContent() {
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Admin Access Denied Alert if redirected */}
       {accessError && (
-        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex items-start gap-3 shadow-xs">
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 shadow-xs">
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-sm font-bold">Admin Portal Access Restricted</h4>
+            <h4 className="text-sm font-bold text-amber-900">Admin Portal Access Restricted</h4>
             <p className="text-xs text-amber-800 mt-0.5">
               Your account has the <strong>Student / User</strong> role and cannot access administrative management pages. You have been redirected to your student dashboard.
             </p>
@@ -67,98 +106,103 @@ function UserDashboardContent() {
         </div>
       )}
 
-      {/* Top Welcome Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Top Welcome & Quick Actions Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border border-[#E5EBE5] p-6 rounded-3xl text-gray-900 shadow-xs">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold mb-2">
             <Sparkles className="w-3.5 h-3.5 text-[#16A34A]" />
-            Student Sustainability Auditor
+            Student Sustainability Auditor Portal
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
             Welcome back, Elakkiyan! 👋
           </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Report environmental issues on campus, track repairs, and earn Eco-Bounty rewards.
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Report environmental issues on campus, verify with Gemini AI, and earn Eco-Bounty rewards.
           </p>
         </div>
 
-        <div>
+        {/* 4 Quick Actions */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/user/report"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#16A34A] hover:bg-[#14532D] text-white text-sm font-bold shadow-md shadow-green-700/25 transition-all duration-150 hover:scale-[1.02]"
+            className="px-3.5 py-2.5 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>+ Report Environmental Issue</span>
+            <span>+ Report Issue</span>
+          </Link>
+
+          <Link
+            href="/user/eco-bounty"
+            className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs"
+          >
+            <Trophy className="w-4 h-4 text-amber-500" />
+            <span>Eco-Bounty Hub</span>
+          </Link>
+
+          <Link
+            href="/user/assistant"
+            className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs"
+          >
+            <Bot className="w-4 h-4 text-[#16A34A]" />
+            <span>Green Assistant</span>
+          </Link>
+
+          <Link
+            href="/user/issues"
+            className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs"
+          >
+            <FileText className="w-4 h-4 text-teal-600" />
+            <span>My Reports</span>
           </Link>
         </div>
       </div>
 
       {/* 4 Student KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {/* My Reports */}
-        <div className="bg-white p-5 rounded-2xl border border-[#E5EBE5] shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">My Reports</span>
-            <div className="text-2xl font-black text-gray-900 mt-1">{totalMyReports}</div>
-            <span className="text-[11px] text-gray-500 font-medium">Filed across campus</span>
-          </div>
-          <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-[#16A34A] flex items-center justify-center">
-            <FileText className="w-5 h-5" />
-          </div>
+        <div className="bg-white border border-[#E5EBE5] shadow-xs p-4 sm:p-5 rounded-2xl">
+          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">My Reports</span>
+          <div className="text-2xl sm:text-3xl font-black text-gray-900 mt-1">{totalMyReports}</div>
+          <span className="text-[11px] text-gray-500 font-medium">Filed across campus</span>
         </div>
 
         {/* Open Reports */}
-        <div className="bg-white p-5 rounded-2xl border border-[#E5EBE5] shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Open Reports</span>
-            <div className="text-2xl font-black text-amber-600 mt-1">{openReportsCount}</div>
-            <span className="text-[11px] text-gray-500 font-medium">Under active review</span>
-          </div>
-          <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-            <Clock className="w-5 h-5" />
-          </div>
+        <div className="bg-white border border-[#E5EBE5] shadow-xs p-4 sm:p-5 rounded-2xl">
+          <span className="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Open Reports</span>
+          <div className="text-2xl sm:text-3xl font-black text-amber-600 mt-1">{openReportsCount}</div>
+          <span className="text-[11px] text-gray-500 font-medium">Under active review</span>
         </div>
 
         {/* Resolved Reports */}
-        <div className="bg-white p-5 rounded-2xl border border-[#E5EBE5] shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Resolved Reports</span>
-            <div className="text-2xl font-black text-emerald-700 mt-1">{resolvedReportsCount}</div>
-            <span className="text-[11px] text-emerald-600 font-bold">100% rewarded</span>
-          </div>
-          <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-[#14532D] flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
+        <div className="bg-white border border-[#E5EBE5] shadow-xs p-4 sm:p-5 rounded-2xl">
+          <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider block">Resolved Reports</span>
+          <div className="text-2xl sm:text-3xl font-black text-teal-700 mt-1">{resolvedReportsCount}</div>
+          <span className="text-[11px] text-gray-500 font-medium">100% rewarded</span>
         </div>
 
         {/* Eco Points */}
-        <div className="bg-gradient-to-br from-[#16A34A] to-[#14532D] text-white p-5 rounded-2xl shadow-md shadow-green-900/15 flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold text-emerald-200 uppercase tracking-wider">Eco Points</span>
-            <div className="text-2xl font-black text-white mt-1">1,240</div>
-            <span className="text-[11px] text-emerald-200 font-medium">+120 pts this week</span>
-          </div>
-          <div className="w-11 h-11 rounded-2xl bg-white/20 text-white flex items-center justify-center">
-            <Trophy className="w-5 h-5" />
-          </div>
+        <div className="bg-white border border-emerald-200 shadow-xs p-4 sm:p-5 rounded-2xl">
+          <span className="text-[11px] font-bold text-[#16A34A] uppercase tracking-wider block">Eco Points</span>
+          <div className="text-2xl sm:text-3xl font-black text-[#16A34A] mt-1">{ecoPoints.toLocaleString()} pts</div>
+          <span className="text-[11px] text-emerald-700 font-medium">+120 pts this week</span>
         </div>
       </div>
 
       {/* Quick Assistant Shortcut Banner */}
-      <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-white border border-emerald-200 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
+      <div className="bg-white border border-[#E5EBE5] shadow-xs rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#16A34A] text-white flex items-center justify-center shrink-0 shadow-sm shadow-green-700/25">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-[#16A34A] flex items-center justify-center shrink-0 shadow-xs">
             <Bot className="w-6 h-6" />
           </div>
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#14532D]">
-              <Sparkles className="w-3.5 h-3.5 text-[#16A34A]" />
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#16A34A]">
+              <Sparkles className="w-3.5 h-3.5" />
               Green Assistant with Campus Sustainability Memory
             </div>
             <h3 className="text-base font-bold text-gray-900 mt-0.5">
               Have questions about campus environmental issues or recycling?
             </h3>
-            <p className="text-xs text-gray-600 mt-0.5">
+            <p className="text-xs text-gray-500 mt-0.5">
               Ask about recurring water leaks in Boys Hostel, IT Block energy waste, or sustainability tips.
             </p>
           </div>
@@ -166,7 +210,7 @@ function UserDashboardContent() {
 
         <Link
           href="/user/assistant"
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white hover:bg-gray-50 border border-emerald-300 text-xs font-bold text-[#14532D] shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold shadow-xs transition-all shrink-0"
         >
           <span>Ask Green Assistant</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -177,12 +221,12 @@ function UserDashboardContent() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">My Recent Reports</h2>
+            <h2 className="text-lg font-black text-gray-900">My Recent Reports</h2>
             <p className="text-xs text-gray-500">Track status and AI verification for your submissions</p>
           </div>
           <Link
             href="/user/issues"
-            className="text-xs font-bold text-[#16A34A] hover:text-[#14532D] flex items-center gap-1"
+            className="text-xs font-bold text-[#16A34A] hover:text-[#15803D] flex items-center gap-1"
           >
             <span>View All My Reports ({totalMyReports})</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -190,9 +234,9 @@ function UserDashboardContent() {
         </div>
 
         {loading ? (
-          <div className="py-12 text-center text-gray-400 text-sm">Loading your reports...</div>
+          <div className="py-12 text-center text-gray-500 text-sm">Loading your reports...</div>
         ) : myReports.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 text-center border border-dashed border-gray-300">
+          <div className="bg-white rounded-2xl p-8 text-center border border-dashed border-gray-300 shadow-xs">
             <p className="text-sm text-gray-500 mb-3">You haven&apos;t reported any environmental issues yet.</p>
             <Link
               href="/user/report"
@@ -226,10 +270,10 @@ function UserDashboardContent() {
                 </div>
 
                 <div className="pt-4 mt-3 border-t border-gray-100 flex items-center justify-between text-xs">
-                  <span className="text-gray-400 font-mono text-[11px]">{issue.location}</span>
+                  <span className="text-gray-500 font-mono text-[11px]">{issue.location}</span>
                   <div className="flex items-center gap-1.5">
                     {issue.ai_verified && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                         <ShieldCheck className="w-3 h-3 text-[#16A34A]" />
                         AI Verified
                       </span>

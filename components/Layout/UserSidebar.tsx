@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Logo from '@/components/Common/Logo';
@@ -22,9 +22,23 @@ const LogOutIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+import { getStudentPoints } from '@/lib/student-points';
+
 export default function UserSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [ecoPoints, setEcoPoints] = useState<number>(1240);
+
+  useEffect(() => {
+    setEcoPoints(getStudentPoints());
+    const handleUpdate = () => setEcoPoints(getStudentPoints());
+    window.addEventListener('eco_points_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('eco_points_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -41,17 +55,17 @@ export default function UserSidebar() {
     { label: 'My Dashboard', href: '/user/dashboard', icon: LayoutDashboard },
     { label: '+ Report Issue', href: '/user/report', icon: PlusCircle, highlight: true },
     { label: 'My Reports', href: '/user/issues', icon: FileText },
-    { label: 'Eco-Bounty Hub', href: '/user/eco-bounty', icon: Trophy, badge: '1,240 pts' },
+    { label: 'Eco-Bounty Hub', href: '/user/eco-bounty', icon: Trophy, badge: `${ecoPoints.toLocaleString()} pts` },
     { label: 'Green Assistant', href: '/user/assistant', icon: Bot, badge: 'AI' },
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-[#E5EBE5] min-h-screen p-4 justify-between sticky top-0 h-screen z-20">
+    <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-[#E5EBE5] text-gray-800 min-h-screen p-4 justify-between sticky top-0 h-screen z-20 shadow-xs">
       <div>
         {/* Brand Header */}
         <div className="pb-5 pt-2 border-b border-gray-100 flex items-center justify-between">
-          <Logo showTagline={false} />
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+          <Logo href="/user/dashboard" showTagline={false} size="sm" />
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
             Student
           </span>
         </div>
@@ -69,27 +83,27 @@ export default function UserSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${
                   isActive
-                    ? 'bg-[#DCFCE7] text-[#14532D] shadow-xs font-semibold'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-[#16A34A] text-white shadow-sm font-bold'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-[#F2F7F2]'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
                     className={`w-4 h-4 ${
-                      isActive ? 'text-[#16A34A]' : 'text-gray-400 group-hover:text-gray-600'
+                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-[#16A34A]'
                     }`}
                   />
                   <span>{item.label}</span>
                 </div>
-                {item.badge && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
+                {item.badge && !isActive && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                     {item.badge}
                   </span>
                 )}
                 {item.highlight && !isActive && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse"></span>
                 )}
               </Link>
             );
@@ -97,22 +111,22 @@ export default function UserSidebar() {
         </nav>
 
         {/* Eco-Bounty Quick Callout */}
-        <div className="mt-8 p-3.5 rounded-2xl bg-gradient-to-br from-[#F7FAF7] to-[#DCFCE7]/60 border border-emerald-200/90 shadow-2xs">
+        <div className="mt-8 p-3.5 rounded-2xl bg-[#F7FAF7] border border-[#E5EBE5]">
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-1.5">
-              <Trophy className="w-4 h-4 text-[#16A34A]" />
-              <span className="text-xs font-bold text-[#14532D]">Your Eco-Bounty</span>
+              <Trophy className="w-4 h-4 text-amber-500" />
+              <span className="text-xs font-bold text-gray-900">Your Eco-Bounty</span>
             </div>
-            <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-              1,240 pts
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+              {ecoPoints.toLocaleString()} pts
             </span>
           </div>
-          <p className="text-[11px] text-gray-600 leading-relaxed">
+          <p className="text-[11px] text-gray-500 leading-relaxed">
             Report environmental issues on campus, verify with Gemini, and earn rewards!
           </p>
           <Link
             href="/user/eco-bounty"
-            className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-[#16A34A] hover:text-[#14532D]"
+            className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-bold text-[#16A34A] hover:text-[#15803D]"
           >
             View Leaderboard & Badges <ExternalLink className="w-3 h-3" />
           </Link>
@@ -121,9 +135,9 @@ export default function UserSidebar() {
 
       {/* User Profile & Logout */}
       <div className="pt-4 border-t border-gray-100 space-y-2">
-        <div className="flex items-center justify-between p-2 rounded-xl bg-gray-50 border border-gray-100">
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-200">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-[#16A34A] text-white flex items-center justify-center font-bold text-xs shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#16A34A] text-white flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
               ER
             </div>
             <div className="min-w-0 truncate">

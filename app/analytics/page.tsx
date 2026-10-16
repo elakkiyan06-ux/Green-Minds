@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { AnalyticsSummary } from '@/lib/types';
 import KPICard from '@/components/Dashboard/KPICard';
 import AnalyticsCharts from '@/components/Analytics/AnalyticsCharts';
-import PredictedRecurringProblems from '@/components/Analytics/PredictedRecurringProblems';
-import ResourceImpactSummary from '@/components/Analytics/ResourceImpactSummary';
 import { 
   BarChart3, 
   FileCheck2, 
@@ -303,12 +301,6 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
-
-      {/* Campus Resource & Financial Impact Estimator */}
-      <ResourceImpactSummary initialAggregate={data.aggregateImpact} />
-
-      {/* Predicted Recurring Problems Section */}
-      <PredictedRecurringProblems predictions={data.predictedRecurringProblems} />
 
       {/* Main Charts Section with Live AI Insight */}
       <AnalyticsCharts data={data} />

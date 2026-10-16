@@ -81,6 +81,10 @@ declare module 'lucide-react' {
   export const Building2: LucideIcon;
   export const Sparkle: LucideIcon;
   export const Camera: LucideIcon;
+  export const Calculator: LucideIcon;
+  export const Download: LucideIcon;
+  export const Sliders: LucideIcon;
+  export const Sprout: LucideIcon;
   
   const allIcons: Record<string, LucideIcon>;
   export default allIcons;

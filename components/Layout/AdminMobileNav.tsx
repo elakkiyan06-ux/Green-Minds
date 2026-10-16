@@ -8,7 +8,8 @@ import {
   FileSpreadsheet, 
   AlertTriangle, 
   BarChart3, 
-  Users 
+  Users,
+  Calculator 
 } from 'lucide-react';
 
 export default function AdminMobileNav() {
@@ -17,13 +18,14 @@ export default function AdminMobileNav() {
   const navItems = [
     { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Issues', href: '/admin/issues', icon: FileSpreadsheet },
+    { label: 'Budget', href: '/admin/budget-planner', icon: Calculator },
     { label: 'Recurring', href: '/admin/recurring-problems', icon: AlertTriangle },
     { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     { label: 'Users', href: '/admin/users', icon: Users },
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0F2015]/95 backdrop-blur-md border-t border-emerald-900/60 px-2 py-1.5 shadow-xl text-gray-300">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5EBE5] px-2 py-1.5 shadow-lg text-gray-600">
       <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -35,8 +37,8 @@ export default function AdminMobileNav() {
               href={item.href}
               className={`flex flex-col items-center py-1 px-2 rounded-lg text-[11px] font-medium transition-colors ${
                 isActive
-                  ? 'text-emerald-400 font-black'
-                  : 'text-emerald-200/60 hover:text-white'
+                  ? 'text-[#16A34A] font-black'
+                  : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               <Icon className="w-5 h-5 mb-0.5" />

@@ -4,7 +4,7 @@ import { analyzeEnvironmentalReport } from '@/lib/gemini';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { location, description, image, voiceTranscript } = body;
+    const { location, description, image, voiceTranscript, imageFileName, imageCategoryHint } = body;
 
     const effectiveDescription = (description && description.trim() !== '')
       ? description.trim()
@@ -29,9 +29,11 @@ export async function POST(req: NextRequest) {
     // Call server-side Gemini AI analysis with multimodal and voice transcript support
     const analysis = await analyzeEnvironmentalReport(
       location, 
-      effectiveDescription || 'Visible environmental concern documented via photo.', 
+      effectiveDescription, 
       image,
-      voiceTranscript
+      voiceTranscript,
+      imageFileName,
+      imageCategoryHint
     );
 
     return NextResponse.json(analysis);

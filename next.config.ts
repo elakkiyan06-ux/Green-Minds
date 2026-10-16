@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: isGithubPages ? true : false,
   },
+  devIndicators: false,
   images: {
     unoptimized: true,
   },

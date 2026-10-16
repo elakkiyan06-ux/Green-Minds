@@ -42,4 +42,5 @@ next-env.d.ts
 
 # scratch test scripts
 test_*.mjs
+*.code-workspace
 

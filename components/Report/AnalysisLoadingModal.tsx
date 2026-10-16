@@ -33,21 +33,21 @@ export default function AnalysisLoadingModal({ hasImage }: AnalysisLoadingModalP
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-emerald-100 relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#E5EBE5] relative overflow-hidden text-gray-900">
         {/* Decorative Top Accent */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#14532D] via-[#16A34A] to-[#DCFCE7]"></div>
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-[#16A34A] to-teal-500"></div>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-[#DCFCE7] flex items-center justify-center text-[#16A34A] animate-pulse">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#16A34A] animate-pulse">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-gray-900">
+            <h3 className="text-base font-black text-gray-900">
               GreenMind Intelligence
             </h3>
             <p className="text-xs text-gray-500">
-              GreenMind is analyzing the environmental issue...
+              Gemini is analyzing the environmental issue...
             </p>
           </div>
         </div>
@@ -61,11 +61,11 @@ export default function AnalysisLoadingModal({ hasImage }: AnalysisLoadingModalP
             return (
               <div
                 key={step.title}
-                className={`flex items-start gap-3 p-2.5 rounded-xl transition-all duration-300 ${
+                className={`flex items-start gap-3 p-3 rounded-2xl transition-all duration-300 ${
                   isCurrent
-                    ? 'bg-emerald-50/80 border border-emerald-200'
+                    ? 'bg-emerald-50 border border-emerald-200'
                     : isDone
-                    ? 'bg-gray-50/50'
+                    ? 'bg-[#F8FAF8] border border-gray-200'
                     : 'opacity-40'
                 }`}
               >
@@ -80,10 +80,10 @@ export default function AnalysisLoadingModal({ hasImage }: AnalysisLoadingModalP
                 </div>
 
                 <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                  <div className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
                     <span>{step.title}</span>
                     {isCurrent && (
-                      <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 rounded">
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
                         In Progress
                       </span>
                     )}
@@ -98,7 +98,7 @@ export default function AnalysisLoadingModal({ hasImage }: AnalysisLoadingModalP
         </div>
 
         <div className="text-center pt-2 border-t border-gray-100">
-          <span className="text-[11px] text-gray-400 font-medium">
+          <span className="text-[11px] text-gray-500 font-medium">
             Powered by Google Gemini 2.0 Flash Multimodal
           </span>
         </div>

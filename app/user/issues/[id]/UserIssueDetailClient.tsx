@@ -77,22 +77,22 @@ export default function UserIssueDetailClient({ id }: { id: string }) {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-300 pb-16">
       {/* Top Navigation */}
-      <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+      <div className="flex items-center justify-between pb-2 border-b border-gray-200">
         <Link
           href="/user/issues"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#16A34A] hover:text-[#14532D] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to My Reports</span>
         </Link>
 
-        <span className="text-xs font-mono text-gray-400">
+        <span className="text-xs font-mono text-gray-700 bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200">
           Ticket #{issue.id}
         </span>
       </div>
 
       {/* Hero Issue Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5EBE5] shadow-xs space-y-6">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E5EBE5] shadow-xs space-y-6 text-gray-900">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <CategoryBadge category={issue.category} />
@@ -117,37 +117,37 @@ export default function UserIssueDetailClient({ id }: { id: string }) {
         </div>
 
         {/* Metadata Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-100 text-xs text-gray-600">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-100 text-xs">
           <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+            <MapPin className="w-4 h-4 text-[#16A34A] shrink-0" />
             <div>
-              <span className="block text-[10px] text-gray-400 font-bold uppercase">Location</span>
-              <span className="font-semibold text-gray-800">{issue.location}</span>
+              <span className="block text-[10px] text-gray-500 font-bold uppercase">Location</span>
+              <span className="font-semibold text-gray-900">{issue.location}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+            <Calendar className="w-4 h-4 text-[#16A34A] shrink-0" />
             <div>
-              <span className="block text-[10px] text-gray-400 font-bold uppercase">Reported</span>
-              <span className="font-semibold text-gray-800">
+              <span className="block text-[10px] text-gray-500 font-bold uppercase">Reported</span>
+              <span className="font-semibold text-gray-900">
                 {new Date(issue.created_at).toLocaleDateString()}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <Building2 className="w-4 h-4 text-[#16A34A] shrink-0" />
             <div>
-              <span className="block text-[10px] text-gray-400 font-bold uppercase">Assigned To</span>
-              <span className="font-semibold text-gray-800">{issue.assigned_department || 'Facilities General'}</span>
+              <span className="block text-[10px] text-gray-500 font-bold uppercase">Assigned To</span>
+              <span className="font-semibold text-gray-900">{issue.assigned_department || 'Facilities General'}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
             <div>
-              <span className="block text-[10px] text-gray-400 font-bold uppercase">Eco Points</span>
+              <span className="block text-[10px] text-gray-500 font-bold uppercase">Eco Points</span>
               <span className="font-bold text-[#16A34A]">+{issue.eco_bounty_points || 50} pts</span>
             </div>
           </div>
@@ -166,13 +166,13 @@ export default function UserIssueDetailClient({ id }: { id: string }) {
       )}
 
       {/* Maintenance Progress Tracking Timeline */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E5EBE5] shadow-xs space-y-4">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-          <Clock className="w-4 h-4 text-emerald-600" />
+      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E5EBE5] shadow-xs space-y-4 text-gray-900">
+        <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+          <Clock className="w-4 h-4 text-[#16A34A]" />
           <span>MAINTENANCE STATUS & TIMELINE</span>
         </h2>
 
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 border border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#F8FAF8] border border-gray-200">
           <div>
             <span className="text-xs font-bold text-gray-500 block">Current Status</span>
             <div className="text-base font-black text-gray-900 mt-0.5 capitalize">
@@ -182,7 +182,7 @@ export default function UserIssueDetailClient({ id }: { id: string }) {
 
           <div>
             <span className="text-xs font-bold text-gray-500 block">Assigned Department</span>
-            <div className="text-sm font-bold text-emerald-700 mt-0.5">
+            <div className="text-sm font-bold text-gray-900 mt-0.5">
               {issue.assigned_department || 'Pending Department Dispatch'}
             </div>
           </div>
@@ -196,11 +196,11 @@ export default function UserIssueDetailClient({ id }: { id: string }) {
         </div>
 
         {issue.resolution_notes && (
-          <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200">
-            <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider block mb-1">
+          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200">
+            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block mb-1">
               Maintenance Technician Note
             </span>
-            <p className="text-xs text-emerald-950 leading-relaxed">
+            <p className="text-xs text-[#14532D] leading-relaxed">
               {issue.resolution_notes}
             </p>
           </div>
@@ -223,13 +223,13 @@ export default function UserIssueDetailClient({ id }: { id: string }) {
 
       {/* AI Observations & Immediate Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-3xl p-6 border border-[#E5EBE5] shadow-xs space-y-3">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+        <div className="bg-white rounded-3xl p-6 border border-[#E5EBE5] shadow-xs space-y-3 text-gray-900">
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
             AI OBSERVATIONS
           </h2>
           <div className="space-y-2">
             {(issue.ai_observations || []).map((obs, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs text-gray-800 p-2.5 rounded-xl bg-gray-50">
+              <div key={idx} className="flex items-start gap-2 text-xs text-gray-800 p-2.5 rounded-xl bg-[#F8FAF8] border border-gray-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] shrink-0 mt-1.5" />
                 <span>{obs}</span>
               </div>
@@ -237,13 +237,13 @@ export default function UserIssueDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 border border-[#E5EBE5] shadow-xs space-y-3">
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+        <div className="bg-white rounded-3xl p-6 border border-[#E5EBE5] shadow-xs space-y-3 text-gray-900">
+          <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
             RECOMMENDED ACTIONS
           </h2>
           <div className="space-y-2">
             {(issue.ai_recommendations || []).map((rec, idx) => (
-              <div key={idx} className="flex items-start gap-2 text-xs font-medium text-gray-800 p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100">
+              <div key={idx} className="flex items-start gap-2 text-xs font-bold text-[#14532D] p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
                 <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 mt-0.5" />
                 <span>{rec}</span>
               </div>

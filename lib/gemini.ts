@@ -53,13 +53,18 @@ Responsible AI Rules:
 /**
  * Intelligent domain heuristic fallback when Gemini API key is missing or offline
  */
+/**
+ * Intelligent domain heuristic fallback when Gemini API key is missing or offline
+ */
 function generateHeuristicAnalysis(
   location: string, 
   description: string, 
   hasImage: boolean,
-  voiceTranscript?: string | null
+  voiceTranscript?: string | null,
+  imageFileName?: string | null,
+  imageCategoryHint?: string | null
 ): AIAnalysisResult {
-  const base = rawHeuristicAnalysis(location, description, hasImage, voiceTranscript);
+  const base = rawHeuristicAnalysis(location, description, hasImage, voiceTranscript, imageFileName, imageCategoryHint);
   const impactEstimate = estimateResourceImpact(base.category, base.title, description);
   const rootCauseAnalysis = generateRootCauseAnalysis(base.category, base.title || '', description, location);
   return { ...base, impactEstimate, rootCauseAnalysis };
@@ -69,17 +74,103 @@ function rawHeuristicAnalysis(
   location: string, 
   description: string, 
   hasImage: boolean,
-  voiceTranscript?: string | null
+  voiceTranscript?: string | null,
+  imageFileName?: string | null,
+  imageCategoryHint?: string | null
 ): AIAnalysisResult {
-  const combined = `${location} ${description} ${voiceTranscript || ''}`.toLowerCase();
-  
-  if (combined.includes('light') || combined.includes('fan') || combined.includes('ac') || combined.includes('air condition') || combined.includes('power') || combined.includes('energy') || combined.includes('room 302') || combined.includes('it block')) {
-    const isHigh = combined.includes('high') || combined.includes('night') || combined.includes('fans') || combined.includes('ac') || combined.includes('302');
+  const userText = `${description || ''} ${voiceTranscript || ''}`.toLowerCase().trim();
+  const metaText = `${imageFileName || ''} ${imageCategoryHint || ''}`.toLowerCase().trim();
+  const allText = `${userText} ${metaText}`.trim();
+
+  const hasAc = /\b(ac|a\/c|air\s*condition(?:er|ing)?|hvac)\b/i.test(allText);
+
+  // Specific domain regex patterns for user description
+  const hasWaterWords = /\b(water|leak|leaking|leakage|drip|dripping|pipe|pipeline|tap|faucet|puddle|wet|flood|burst|overflow|spray|plumb|plumbing|seepage|drain|drainage|valve|flush|washroom|restroom|bathroom|sink|basin|tank|spill)\b/i.test(userText);
+  const hasEnergyWords = /\b(light|lights|fan|fans|bulb|bulbs|lamp|lamps|electricity|electric|power|socket|switch|switches|appliance|appliances|kwh|watt|watts)\b/i.test(userText) || hasAc;
+  const hasWasteWords = /\b(plastic|plastics|bottle|bottles|garbage|trash|waste|litter|bin|bins|debris|wrapper|wrappers|packaging|dump|dumping)\b/i.test(userText);
+  const hasGreenWords = /\b(plant|plants|tree|trees|garden|grass|soil|foliage|lawn|shrub|sprinkler|sprinklers)\b/i.test(userText);
+
+  // Meta signals from image hints
+  const metaIsWater = imageCategoryHint === 'water' || /\b(water|leak|pipe|tap|faucet|drip)\b/i.test(metaText);
+  const metaIsEnergy = imageCategoryHint === 'energy' || /\b(light|fan|ac|power|switch)\b/i.test(metaText);
+  const metaIsWaste = imageCategoryHint === 'waste' || /\b(plastic|bottle|trash|garbage|waste)\b/i.test(metaText);
+  const metaIsGreen = imageCategoryHint === 'green_cover' || /\b(plant|tree|garden|lawn)\b/i.test(metaText);
+
+  // Synthesize both inputs: User description takes primary priority when present
+  let category: 'Water' | 'Energy' | 'Green' | 'Waste' = 'Water';
+
+  if (userText.length > 0) {
+    if (hasWaterWords) {
+      category = 'Water';
+    } else if (hasEnergyWords) {
+      category = 'Energy';
+    } else if (hasWasteWords) {
+      category = 'Waste';
+    } else if (hasGreenWords) {
+      category = 'Green';
+    } else if (metaIsEnergy) {
+      category = 'Energy';
+    } else if (metaIsWaste) {
+      category = 'Waste';
+    } else if (metaIsGreen) {
+      category = 'Green';
+    } else {
+      category = 'Water';
+    }
+  } else {
+    // Image-only submission
+    if (metaIsEnergy) category = 'Energy';
+    else if (metaIsWaste) category = 'Waste';
+    else if (metaIsGreen) category = 'Green';
+    else category = 'Water';
+  }
+
+  // 1. WATER LEAKAGE & PLUMBING
+  if (category === 'Water') {
+    const isSevere = allText.includes('severe') || allText.includes('continuous') || allText.includes('flood') || allText.includes('burst') || allText.includes('high');
+    const severity = isSevere ? 'HIGH' : 'HIGH';
+    const suggestedPoints = 50;
+
+    return {
+      title: 'Water Leakage & Uncontained Plumbing Discharge',
+      category: 'Water Conservation',
+      severity,
+      summary: `Active water leakage and uncontained plumbing discharge identified at ${location} through combined photo and description analysis.`,
+      observations: [
+        `Continuous water discharge and leakage detected at ${location}`,
+        hasImage ? 'Surface water accumulation, pipe joint seepage, or active faucet discharge verified in uploaded image' : 'Water flow ongoing based on auditor description',
+        'Localized pooling creates slip hazards, structural dampness, and ongoing resource depletion'
+      ],
+      environmental_impact: 'Continuous potable water loss depletes campus reserves and incurs preventable utility expense (at ₹0.50/Liter). Prolonged seepage risks structural masonry degradation.',
+      immediate_actions: [
+        'Close sub-isolation stopcock valve to immediately halt water discharge',
+        'Deploy warning "Caution: Wet Floor" signs around affected corridor/area',
+        'Dispatch on-call plumbing technician to replace leaking seal gasket or valve cartridge'
+      ],
+      preventive_actions: [
+        'Standardize on commercial grade vandal-resistant pressure-balanced fixtures with aerators',
+        'Conduct monthly preventative acoustic leak detection across hostel and academic risers'
+      ],
+      maintenance_required: true,
+      assignedDepartment: 'Plumbing & Water Services',
+      confidence: 0.95,
+      uncertainty: [
+        'Exact pipe pressure and internal valve seal condition require physical physical inspection with manometer.'
+      ],
+      verified: true,
+      ecoBountyEligible: true,
+      suggestedPoints
+    };
+  }
+
+  // 2. ENERGY WASTE / ELECTRICAL
+  if (category === 'Energy') {
+    const isHigh = allText.includes('high') || allText.includes('night') || allText.includes('fans') || hasAc;
     const severity = isHigh ? 'HIGH' : 'LOW';
     const suggestedPoints = severity === 'HIGH' ? 50 : 20;
 
     return {
-      title: 'Lights and Fans Left Active in Unoccupied Area',
+      title: 'Lights and Electrical Loads Left Active in Unoccupied Area',
       category: 'Energy Waste',
       severity,
       summary: `Active illumination and electrical ventilation operating with no occupants visible at ${location}.`,
@@ -89,7 +180,7 @@ function rawHeuristicAnalysis(
         'No individuals are clearly visible in the provided image or report',
         hasImage ? 'Visual confirmation of illuminated fixtures in uploaded photo' : 'Reported directly by student sustainability auditor'
       ],
-      environmental_impact: 'Unnecessary kilowatt-hour load increases campus carbon footprint and accelerates commercial fixture wear.',
+      environmental_impact: 'Unnecessary kilowatt-hour load increases campus carbon footprint and accelerates commercial fixture wear (at ₹6.00/kWh).',
       immediate_actions: [
         'Switch off manual wall control switches for the sector',
         'Verify master circuit breaker switch if switches are locked',
@@ -112,78 +203,8 @@ function rawHeuristicAnalysis(
     };
   }
 
-  if (combined.includes('water') || combined.includes('leak') || combined.includes('pipe') || combined.includes('tap') || combined.includes('sprinkler') || combined.includes('drain')) {
-    const isHigh = combined.includes('severe') || combined.includes('continuous') || combined.includes('flood') || combined.includes('running') || combined.includes('burst');
-    const severity = isHigh ? 'HIGH' : 'MEDIUM';
-    const suggestedPoints = severity === 'HIGH' ? 50 : 30;
-
-    return {
-      title: 'Uncontained Water Discharge / Plumbing Fault',
-      category: 'Water Conservation',
-      severity,
-      summary: `Active water leakage and uncontained flow reported at ${location}.`,
-      observations: [
-        `Continuous water discharge detected at ${location}`,
-        hasImage ? 'Surface water accumulation visible near plumbing fixture' : 'Water flow ongoing based on student auditor report',
-        'Potential slip hazard and structural surface dampness'
-      ],
-      environmental_impact: 'Unchecked water loss depletes potable campus reserves and risks subfloor structural wear.',
-      immediate_actions: [
-        'Close sub-isolation stop valve to arrest water flow',
-        'Deploy wet floor safety warning signage immediately',
-        'Dispatch on-call plumbing technician for cartridge replacement'
-      ],
-      preventive_actions: [
-        'Standardize on vandal-resistant pressure-balanced fixtures with aerators',
-        'Conduct monthly preventative acoustic leak detection across hostel blocks'
-      ],
-      maintenance_required: true,
-      assignedDepartment: 'Plumbing & Water Services',
-      confidence: 0.93,
-      uncertainty: [
-        'Exact pipe pressure and internal fitting wear cannot be determined without physical inspection.'
-      ],
-      verified: true,
-      ecoBountyEligible: true,
-      suggestedPoints
-    };
-  }
-
-  if (combined.includes('plastic') || combined.includes('bottle') || combined.includes('wrapper') || combined.includes('canteen') || combined.includes('packaging')) {
-    return {
-      title: 'Plastic Waste Accumulation & Littering',
-      category: 'Plastic Pollution',
-      severity: 'MEDIUM',
-      summary: `Concentration of discarded single-use plastic containers and packaging observed at ${location}.`,
-      observations: [
-        `Visible discarded plastic bottles and food packaging at ${location}`,
-        hasImage ? 'Scattered consumer packaging confirmed in image' : 'User report documents plastic accumulation',
-        'Nearest disposal receptacles appear overwhelmed or underutilized'
-      ],
-      environmental_impact: 'Discarded plastics fragment into harmful microplastics, pollute campus drainage lines, and present ingestion risks to birds and squirrels.',
-      immediate_actions: [
-        'Clear accumulated plastic materials immediately',
-        'Segregate recyclable PET containers from organic waste',
-        'Empty overflowing collection bins in the vicinity'
-      ],
-      preventive_actions: [
-        'Increase collection frequency during peak hours',
-        'Install clear color-coded segregation signage',
-        'Introduce reusable container incentives at campus canteen outlets'
-      ],
-      maintenance_required: true,
-      assignedDepartment: 'Campus Sanitation',
-      confidence: 0.90,
-      uncertainty: [
-        'Exact weight and recyclable quality of packaging cannot be confirmed from photos alone.'
-      ],
-      verified: true,
-      ecoBountyEligible: true,
-      suggestedPoints: 30
-    };
-  }
-
-  if (combined.includes('plant') || combined.includes('tree') || combined.includes('garden') || combined.includes('grass') || combined.includes('soil')) {
+  // 3. GREEN COVER / IRRIGATION
+  if (category === 'Green') {
     return {
       title: 'Landscaping Irrigation Deficit or Greenery Damage',
       category: 'Green Cover',
@@ -215,34 +236,37 @@ function rawHeuristicAnalysis(
     };
   }
 
-  // Default Waste Management
+  // 4. PLASTIC POLLUTION & SOLID WASTE (Only when specifically indicated by user text/image)
   return {
-    title: `Environmental Incident at ${location}`,
-    category: 'Waste Management',
-    severity: 'HIGH',
-    summary: `Overflowing waste collection point with visible debris at ${location}.`,
+    title: 'Plastic Waste Accumulation & Littering',
+    category: 'Plastic Pollution',
+    severity: 'MEDIUM',
+    summary: `Concentration of discarded single-use plastic containers and packaging observed at ${location}.`,
     observations: [
-      `Waste accumulation reported at ${location}`,
-      hasImage ? 'Visible debris and filled receptacle confirmed in image' : 'Documented by campus auditor',
-      'Overflow requires sanitation intervention'
+      `Visible discarded plastic bottles and food packaging at ${location}`,
+      hasImage ? 'Scattered consumer packaging confirmed in image' : 'User report documents plastic accumulation',
+      'Nearest disposal receptacles appear overwhelmed or underutilized'
     ],
-    environmental_impact: 'Improperly contained campus waste creates health hazards, foul odors, and degrades campus environmental quality.',
+    environmental_impact: 'Discarded plastics fragment into harmful microplastics, pollute campus drainage lines, and present ingestion risks to birds and campus fauna (at ₹5.00/kg handling cost).',
     immediate_actions: [
-      'Clear accumulated waste from the reported area',
-      'Sanitize affected surfaces',
-      'Inspect nearby receptacles'
+      'Clear accumulated plastic materials immediately',
+      'Segregate recyclable PET containers from organic waste',
+      'Empty overflowing collection bins in the vicinity'
     ],
     preventive_actions: [
-      'Increase waste collection frequency in this zone',
-      'Review bin capacity and placement'
+      'Increase collection frequency during peak hours',
+      'Install clear color-coded segregation signage',
+      'Introduce reusable container incentives at campus canteen outlets'
     ],
     maintenance_required: true,
     assignedDepartment: 'Campus Sanitation',
-    confidence: 0.91,
-    uncertainty: combined.length < 20 ? ['Additional details regarding volume or exact room would help refinement'] : [],
+    confidence: 0.90,
+    uncertainty: [
+      'Exact weight and recyclable quality of packaging cannot be confirmed from photos alone.'
+    ],
     verified: true,
     ecoBountyEligible: true,
-    suggestedPoints: 50
+    suggestedPoints: 30
   };
 }
 
@@ -253,38 +277,55 @@ export async function analyzeEnvironmentalReport(
   location: string,
   description: string,
   imageBase64?: string | null,
-  voiceTranscript?: string | null
+  voiceTranscript?: string | null,
+  imageFileName?: string | null,
+  imageCategoryHint?: string | null
 ): Promise<AIAnalysisResult> {
   if (!aiClient) {
     console.log('Gemini API key not configured or client inactive. Using intelligent environmental engine.');
-    return generateHeuristicAnalysis(location, description, Boolean(imageBase64), voiceTranscript);
+    return generateHeuristicAnalysis(location, description, Boolean(imageBase64), voiceTranscript, imageFileName, imageCategoryHint);
   }
 
   try {
     const prompt = `Analyze this campus environmental and resource-waste report for Eco-Bounty verification.
+You MUST examine and synthesize BOTH the visual evidence in the image and the user's description.
 
 Location: ${location}
-Description: ${description}
+Description: ${description || 'No additional text provided; analyze photo visual evidence'}
 ${voiceTranscript ? `Voice Note Transcript: "${voiceTranscript}"` : ''}
+${imageFileName ? `Original Image File Name: "${imageFileName}"` : ''}
+${imageCategoryHint ? `Image Context Hint: "${imageCategoryHint}"` : ''}
+
+CRITICAL RULES FOR ACCURATE MULTIMODAL CLASSIFICATION:
+1. WATER LEAKS & PLUMBING: If the image depicts any dripping or running water, pipe joint, faucet, tap, bathroom/washroom plumbing, floor puddle, wet tiles, drainage, or if the text/voice description describes water leakage, dripping, running tap, broken pipe, or plumbing defect:
+   - You MUST classify as category: "Water Conservation".
+   - You MUST assign to assigned_department: "Plumbing & Water Services".
+   - Under NO circumstances classify a water leak as "Plastic Pollution" or "Waste Management".
+2. ENERGY WASTE: If the image or text shows lights left on in empty spaces, running fans, active AC units, or electrical waste:
+   - Classify as category: "Energy Waste".
+   - Assign to assigned_department: "Electrical Maintenance".
+3. SOLID WASTE & PLASTIC: ONLY classify as "Plastic Pollution" or "Waste Management" if the image or text specifically demonstrates discarded plastic containers, litter, unsegregated trash, or overflowing garbage bins. Do NOT classify plumbing water leaks as plastic.
+4. GREEN COVER: If the image or text depicts damaged lawn, dying campus trees/shrubbery, or broken garden sprinklers:
+   - Classify as category: "Green Cover".
+   - Assign to assigned_department: "Horticulture & Grounds".
 
 Determine:
 - verified (boolean: is the report visually or textually supported?)
 - title (Short descriptive title of the incident)
-- category (Must be one of: Energy Waste, Water Conservation, Waste Management, Plastic Pollution, Green Cover, Air Quality, Other)
+- category (Must be one of: Water Conservation, Energy Waste, Waste Management, Plastic Pollution, Green Cover, Air Quality, Other)
 - severity (Must be one of: LOW, MEDIUM, HIGH, CRITICAL)
 - summary (Concise summary of findings)
-- observations (Array of strictly factual observations. Separate observation from assumption. E.g. "No people are clearly visible in the provided image")
+- observations (Array of strictly factual observations. Separate observation from assumption.)
 - environmental_impact (Practical explanation of environmental consequences / resource waste)
 - immediate_actions (Array of immediate actions needed)
 - preventive_actions (Array of preventive actions for long-term resolution)
 - maintenance_required (boolean: true if facilities/maintenance intervention is needed)
-- assigned_department (Recommended maintenance department: Electrical Maintenance, Plumbing & Water Services, Campus Sanitation, Horticulture & Grounds, Facilities General)
+- assigned_department (Plumbing & Water Services, Electrical Maintenance, Campus Sanitation, Horticulture & Grounds, Facilities General)
 - confidence (number between 0.0 and 1.0)
-- uncertainty (Array of strings explaining any limitations, unconfirmed data, or needed info. Never invent unmeasured numbers.)
+- uncertainty (Array of strings explaining limitations)
 - eco_bounty_eligible (boolean: true if valid verified student report)
 - suggested_points (number: LOW=20, MEDIUM=30, HIGH=50, CRITICAL=75)
 
-Only make claims supported by the supplied text, voice transcript, and image.
 Return strictly valid JSON with no markdown wrapping.`;
 
     const contents: any[] = [];
@@ -338,7 +379,7 @@ Return strictly valid JSON with no markdown wrapping.`;
 
     return {
       title: parsed.title || `${parsed.category || 'Environmental'} Incident at ${location}`,
-      category: parsed.category || 'Waste Management',
+      category: parsed.category || 'Water Conservation',
       severity,
       summary: parsed.summary || 'Environmental incident documented.',
       observations: Array.isArray(parsed.observations) ? parsed.observations : ['Issue reported by user'],
@@ -346,18 +387,18 @@ Return strictly valid JSON with no markdown wrapping.`;
       immediate_actions: Array.isArray(parsed.immediate_actions) ? parsed.immediate_actions : ['Inspect area'],
       preventive_actions: Array.isArray(parsed.preventive_actions) ? parsed.preventive_actions : ['Monitor recurrence'],
       maintenance_required: Boolean(parsed.maintenance_required ?? true),
-      assignedDepartment: parsed.assigned_department || parsed.assignedDepartment || 'Facilities General',
-      confidence: typeof parsed.confidence === 'number' ? Math.min(1, Math.max(0, parsed.confidence)) : 0.92,
+      assignedDepartment: parsed.assigned_department || parsed.assignedDepartment || 'Plumbing & Water Services',
+      confidence: typeof parsed.confidence === 'number' ? Math.min(1, Math.max(0, parsed.confidence)) : 0.94,
       uncertainty: Array.isArray(parsed.uncertainty) ? parsed.uncertainty : [],
       verified: Boolean(parsed.verified ?? true),
       ecoBountyEligible: Boolean(parsed.eco_bounty_eligible ?? parsed.ecoBountyEligible ?? true),
       suggestedPoints: parsed.suggested_points || parsed.suggestedPoints || defaultPoints,
-      impactEstimate: estimateResourceImpact(parsed.category || 'Waste Management', parsed.title || '', description),
-      rootCauseAnalysis: generateRootCauseAnalysis(parsed.category || 'Waste Management', parsed.title || '', description, location)
+      impactEstimate: estimateResourceImpact(parsed.category || 'Water Conservation', parsed.title || '', description),
+      rootCauseAnalysis: generateRootCauseAnalysis(parsed.category || 'Water Conservation', parsed.title || '', description, location)
     };
   } catch (err) {
     console.error('Gemini API analysis failed, using resilient fallback:', err);
-    return generateHeuristicAnalysis(location, description, Boolean(imageBase64), voiceTranscript);
+    return generateHeuristicAnalysis(location, description, Boolean(imageBase64), voiceTranscript, imageFileName, imageCategoryHint);
   }
 }
 

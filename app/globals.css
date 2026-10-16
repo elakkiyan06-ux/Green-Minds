@@ -59,3 +59,13 @@ body {
   backdrop-filter: blur(8px);
   border: 1px solid #E2E8F0;
 }
+
+/* Hide Next.js dev indicator and toast */
+nextjs-portal,
+[data-nextjs-toast],
+[data-nextjs-dialog-overlay],
+div[data-nextjs-dev-overlay] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

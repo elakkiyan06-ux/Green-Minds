@@ -27,7 +27,7 @@ export function generateRootCauseAnalysis(
   const hasHistoricalRecurrence = sameLocationAndCatHistory.length >= 2;
 
   // 1. Water Leakage / Plumbing Issues
-  if (cat.includes('water') || combined.includes('leak') || combined.includes('pipe') || combined.includes('tap') || combined.includes('faucet')) {
+  if (cat.includes('water') || combined.includes('leak') || combined.includes('pipe') || combined.includes('tap') || combined.includes('faucet') || combined.includes('drip') || combined.includes('plumb') || combined.includes('puddle') || combined.includes('seepage') || combined.includes('drain')) {
     const evidence = hasHistoricalRecurrence
       ? `Similar leakage incidents have been reported at the same location (${sameLocationAndCatHistory.length} recorded events in ${location}).`
       : `Visible localized moisture and uncontained discharge observed in uploaded report at ${location}.`;
@@ -48,7 +48,8 @@ export function generateRootCauseAnalysis(
   }
 
   // 2. Energy Waste / HVAC / Lighting
-  if (cat.includes('energy') || combined.includes('light') || combined.includes('fan') || combined.includes('ac') || combined.includes('power')) {
+  const hasAc = /\b(ac|a\/c|air\s*condition(?:er|ing)?|hvac)\b/i.test(combined);
+  if (cat.includes('energy') || combined.includes('light') || combined.includes('fan') || hasAc || combined.includes('power')) {
     const evidence = hasHistoricalRecurrence
       ? `Multiple occurrences of active lighting/HVAC post-lecture have been audited at ${location} (${sameLocationAndCatHistory.length} logged incidents).`
       : `Illumination and ventilation operating without occupant presence visible in report evidence.`;

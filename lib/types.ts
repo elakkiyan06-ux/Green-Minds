@@ -23,6 +23,35 @@ export type MaintenanceDepartment =
   | 'Security'
   | 'General Maintenance';
 
+export const CAMPUS_LOCATIONS = [
+  'AS block (EW)',
+  'IB block (WW)',
+  'Mechanical block',
+  'SF block',
+  'Research Park',
+  'Parking',
+  'Learning Center',
+  'Stone Bench',
+  'Main Auditorium',
+  'Road',
+  'Pathway',
+  'A Gate',
+  'B Gate',
+  'C Gate',
+  'Girls Hostel',
+  'Boys Hostel',
+  'Medical Centre',
+  'Playground',
+  'Gym',
+  'Mess',
+  'Cafeteria',
+  'ATM',
+  'Seminar Hall',
+  'Other',
+] as const;
+
+export type CampusLocation = typeof CAMPUS_LOCATIONS[number];
+
 export interface User {
   id: string;
   name: string;
@@ -131,6 +160,7 @@ export interface AggregateImpactEstimate {
   tariffs: {
     electricityPerKWh: number;
     waterPer1000L: number;
+    waterPerLiter?: number;
     wastePerKg: number;
   };
   isEstimated: true;
@@ -256,3 +286,43 @@ export interface AnalyticsSummary {
   predictedRecurringProblems?: RecurringProblemPrediction[];
   aggregateImpact?: AggregateImpactEstimate;
 }
+
+export interface BudgetActionItem {
+  id: string;
+  problem: string;
+  location: string;
+  category: EnvironmentalCategory;
+  estimatedCost: number;
+  expectedBenefit: string;
+  priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  estimatedRoi: string;
+  suggestedAction: string;
+  annualSavings: number;
+  co2ReductionKg: number;
+  resourceSaved: string;
+  paybackMonths: number;
+  isBestInvestment?: boolean;
+  department: MaintenanceDepartment;
+  urgencyReason: string;
+  relatedIssuesCount?: number;
+}
+
+export interface SustainabilityBudgetPlan {
+  availableBudget: number;
+  recommendedActions: BudgetActionItem[];
+  bestInvestment: BudgetActionItem;
+  comparison: {
+    budgetRequired: number;
+    budgetAvailable: number;
+    remainingBudget: number;
+    utilizationRate: number;
+    totalAnnualSavings: number;
+    estimatedThreeYearSavings: number;
+    netBenefitThreeYear: number;
+    totalCo2AvoidedKg: number;
+    waterSavedLitersYear: number;
+    energySavedKwhYear: number;
+    wasteSegregatedKgYear: number;
+  };
+}
+
