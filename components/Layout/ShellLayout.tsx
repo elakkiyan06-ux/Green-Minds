@@ -12,13 +12,28 @@ import AdminMobileNav from './AdminMobileNav';
 export default function ShellLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // 1. Standalone auth pages: Clean canvas without sidebars or headers
-  if (pathname === '/login' || pathname === '/admin/login') {
-    return <>{children}</>;
+  // Normalize pathname: remove basePath (/Green-Minds) and trailing slashes
+  const cleanPath = (pathname || '')
+    .replace(/^\/Green-Minds/, '')
+    .replace(/\/$/, '') || '/';
+
+  // 1. Standalone auth pages: Clean standalone canvas without sidebars or headers
+  const isAuthPage = 
+    cleanPath === '/login' || 
+    cleanPath === '/admin/login' || 
+    cleanPath.endsWith('/login') ||
+    Boolean(pathname && (pathname.includes('/login/') || pathname.endsWith('/login')));
+
+  if (isAuthPage) {
+    return (
+      <div className="min-h-screen bg-[#F8FAF8] text-gray-900 antialiased selection:bg-[#16A34A] selection:text-white">
+        {children}
+      </div>
+    );
   }
 
-  // 2. Admin Portal routes: Clean white student portal theme with emerald accents
-  if (pathname?.startsWith('/admin')) {
+  // 2. Admin Portal routes
+  if (cleanPath.startsWith('/admin')) {
     return (
       <div className="flex min-h-screen bg-[#F8FAF8] text-gray-900 antialiased selection:bg-[#16A34A] selection:text-white">
         <AdminSidebar />
@@ -33,7 +48,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // 3. User / Student Portal routes: Clean white student portal theme with emerald accents
+  // 3. User / Student Portal routes
   return (
     <div className="flex min-h-screen bg-[#F8FAF8] text-gray-900 antialiased selection:bg-[#16A34A] selection:text-white">
       <UserSidebar />

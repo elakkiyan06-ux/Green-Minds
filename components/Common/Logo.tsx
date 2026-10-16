@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 interface LogoProps {
@@ -16,18 +18,40 @@ export default function Logo({
   className = '',
   size = 'md'
 }: LogoProps) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const [logoSrc, setLogoSrc] = useState('/greenmind-logo.png');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith('/Green-Minds')) {
+      setLogoSrc('/Green-Minds/greenmind-logo.png');
+    }
+  }, []);
+
   const iconDimensions = size === 'lg' ? 'w-14 h-14' : size === 'sm' ? 'w-8 h-8' : 'w-10 h-10';
 
   return (
     <Link href={href} className={`flex items-center gap-3 group focus:outline-none ${className}`}>
       {/* Official Uploaded GreenMind Logo */}
       <div className={`relative flex items-center justify-center ${iconDimensions} rounded-2xl overflow-hidden bg-white border border-[#E5EBE5] shadow-xs group-hover:scale-105 transition-transform duration-200 shrink-0`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/greenmind-logo.png"
-          alt="GREENMIND AI Campus Assist Logo"
-          className="w-full h-full object-cover"
-        />
+        {!imgFailed ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={logoSrc}
+            alt="GREENMIND AI Campus Assist Logo"
+            className="w-full h-full object-cover"
+            onError={() => {
+              if (!logoSrc.startsWith('/Green-Minds')) {
+                setLogoSrc('/Green-Minds/greenmind-logo.png');
+              } else {
+                setImgFailed(true);
+              }
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-emerald-600 to-[#14532D] flex items-center justify-center text-white font-black text-sm">
+            🌿
+          </div>
+        )}
         <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#16A34A]"></span>
