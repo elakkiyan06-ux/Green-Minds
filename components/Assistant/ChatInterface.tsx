@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { AssistantMessage, AssistantRecommendation } from '@/lib/types';
+import { askClientAssistant } from '@/lib/client-environmental';
 import { 
   Send, 
   Sparkles, 
@@ -89,16 +90,17 @@ export default function ChatInterface({ initialQuestion }: ChatInterfaceProps) {
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
-      console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `err-${Date.now()}`,
-          role: 'assistant',
-          content: "GreenMind couldn't complete the analysis right now. Please try asking again.",
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        }
-      ]);
+      console.warn('API /api/assistant unreachable, using client knowledge engine', err);
+      const fallback = askClientAssistant(q);
+      const aiMessage: AssistantMessage = {
+        id: `ai-${Date.now()}`,
+        role: 'assistant',
+        content: fallback.text,
+        recommendations: fallback.recommendations,
+        isCampusDataBased: fallback.isCampusDataBased,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, aiMessage]);
     } finally {
       setLoading(false);
     }

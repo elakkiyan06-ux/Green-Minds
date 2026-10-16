@@ -8,6 +8,7 @@ import SeverityBadge from '@/components/Common/SeverityBadge';
 import CategoryBadge from '@/components/Common/CategoryBadge';
 import RewardModal from '@/components/EcoBounty/RewardModal';
 import { getStudentPoints, addStudentPoints } from '@/lib/student-points';
+import { saveClientReportedIssue } from '@/lib/client-environmental';
 import ResourceImpactCard from '@/components/Common/ResourceImpactCard';
 import RootCauseCard from '@/components/Common/RootCauseCard';
 import { 
@@ -54,7 +55,16 @@ export default function AnalysisResultClient({ issueId }: { issueId: string }) {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem(`pending_analysis_${issueId}`);
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryId = urlParams.get('id');
+      const targetId = queryId || issueId;
+
+      const stored = 
+        sessionStorage.getItem(`pending_analysis_${targetId}`) ||
+        sessionStorage.getItem(`pending_analysis_${issueId}`) ||
+        (targetId === 'demo' || issueId === 'demo' ? sessionStorage.getItem('pending_analysis_demo') : null) ||
+        (sessionStorage.getItem('latest_pending_id') ? sessionStorage.getItem(`pending_analysis_${sessionStorage.getItem('latest_pending_id')}`) : null);
+
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
@@ -174,6 +184,9 @@ export default function AnalysisResultClient({ issueId }: { issueId: string }) {
       } catch {
         // Fallback for static demo mode
       }
+
+      // Persist to client issues registry so report immediately appears in My Reports & Dashboard on GitHub Pages
+      saveClientReportedIssue(issueBody as any);
 
       // Credit points if not yet awarded for this ticket
       if (typeof window !== 'undefined') {

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 
 import { getStudentPoints } from '@/lib/student-points';
+import { getClientIssues, getClientReportedIssues } from '@/lib/client-environmental';
 
 function UserDashboardContent() {
   const searchParams = useSearchParams();
@@ -35,13 +36,21 @@ function UserDashboardContent() {
   const loadDashboardData = () => {
     setEcoPoints(getStudentPoints());
     fetch('/api/issues')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('API offline');
+        return res.json();
+      })
       .then((data) => {
         if (Array.isArray(data)) {
-          setIssues(data);
+          const custom = getClientReportedIssues();
+          const merged = [...custom, ...data.filter(d => !custom.some(c => c.id === d.id))];
+          setIssues(merged);
         }
       })
-      .catch((err) => console.error(err))
+      .catch(() => {
+        // Fallback for static GitHub Pages or offline
+        setIssues(getClientIssues());
+      })
       .finally(() => setLoading(false));
 
     fetch('/api/eco-bounty')
@@ -62,20 +71,16 @@ function UserDashboardContent() {
 
     const handlePointsUpdate = () => {
       setEcoPoints(getStudentPoints());
-      // Refresh issues list in case new report was just added
-      fetch('/api/issues')
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) setIssues(data);
-        })
-        .catch(() => {});
+      loadDashboardData();
     };
 
     window.addEventListener('eco_points_updated', handlePointsUpdate);
+    window.addEventListener('gm_issues_updated', handlePointsUpdate);
     window.addEventListener('storage', handlePointsUpdate);
 
     return () => {
       window.removeEventListener('eco_points_updated', handlePointsUpdate);
+      window.removeEventListener('gm_issues_updated', handlePointsUpdate);
       window.removeEventListener('storage', handlePointsUpdate);
     };
   }, []);

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { EnvironmentalIssue } from '@/lib/types';
+import { getClientIssues, getClientReportedIssues } from '@/lib/client-environmental';
 import { 
   Search, 
   Filter, 
@@ -55,17 +56,27 @@ export default function AdminIssuesPage() {
       const res = await fetch('/api/issues');
       if (res.ok) {
         const data = await res.json();
-        setIssues(data);
+        if (Array.isArray(data)) {
+          const custom = getClientReportedIssues();
+          const merged = [...custom, ...data.filter(d => !custom.some(c => c.id === d.id))];
+          setIssues(merged);
+          setLoading(false);
+          return;
+        }
       }
     } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+      // API offline or on GitHub Pages
     }
+    setIssues(getClientIssues());
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchIssues();
+
+    const handleUpdate = () => fetchIssues();
+    window.addEventListener('gm_issues_updated', handleUpdate);
+    return () => window.removeEventListener('gm_issues_updated', handleUpdate);
   }, []);
 
   // Filter issues locally based on full admin criteria

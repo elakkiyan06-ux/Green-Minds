@@ -18,6 +18,7 @@ import {
   Coins
 } from 'lucide-react';
 import { addStudentPoints } from '@/lib/student-points';
+import { analyzeReportInClient, saveClientReportedIssue } from '@/lib/client-environmental';
 
 function ReportPageContent() {
   const router = useRouter();
@@ -49,61 +50,80 @@ function ReportPageContent() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location,
-          description: effectiveDesc,
-          image,
-          voiceTranscript: voiceTranscript.trim() || undefined,
-          imageFileName: image ? (imageFileName || undefined) : undefined,
-          imageCategoryHint: image ? (imageCategoryHint || undefined) : undefined,
-        }),
-      });
+      let analysisResult: any = null;
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to analyze environmental report.');
+      // 1. Try server API /api/analyze first (active in dev/Vercel)
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location,
+            description: effectiveDesc,
+            image,
+            voiceTranscript: voiceTranscript.trim() || undefined,
+            imageFileName: image ? (imageFileName || undefined) : undefined,
+            imageCategoryHint: image ? (imageCategoryHint || undefined) : undefined,
+          }),
+        });
+
+        if (res.ok) {
+          analysisResult = await res.json();
+        }
+      } catch (networkErr) {
+        // Will fall back to client engine below
       }
 
-      const analysisResult = await res.json();
+      // 2. Client-side environmental analysis fallback (for GitHub Pages static export or offline)
+      if (!analysisResult) {
+        analysisResult = analyzeReportInClient(
+          location,
+          effectiveDesc,
+          Boolean(image),
+          voiceTranscript.trim() || undefined,
+          imageFileName || undefined,
+          imageCategoryHint || undefined
+        );
+      }
+
       const issueId = `EB-${Date.now().toString().slice(-4)}`;
       const points = analysisResult.suggestedPoints || (analysisResult.severity === 'HIGH' ? 50 : 30);
 
-      // Auto-save the reported issue to /api/issues so it immediately updates in Student Dashboard
-      try {
-        const issueBody = {
-          id: issueId,
-          title: analysisResult.title || `${analysisResult.category} Incident at ${location}`,
-          description: effectiveDesc,
-          category: analysisResult.category?.toLowerCase()?.includes('energy') ? 'energy' : 
-                    analysisResult.category?.toLowerCase()?.includes('water') ? 'water' : 
-                    analysisResult.category?.toLowerCase()?.includes('green') ? 'green_cover' :
-                    analysisResult.category?.toLowerCase()?.includes('plastic') || analysisResult.category?.toLowerCase()?.includes('waste') ? 'waste' : 'other',
-          location,
-          severity: (analysisResult.severity || 'medium').toLowerCase(),
-          status: 'open',
-          image_url: image || undefined,
-          ai_summary: analysisResult.summary,
-          ai_observations: analysisResult.observations,
-          ai_impact: analysisResult.environmental_impact,
-          ai_recommendations: analysisResult.immediate_actions,
-          ai_preventive_actions: analysisResult.preventive_actions,
-          ai_confidence: analysisResult.confidence,
-          ai_uncertainty: analysisResult.uncertainty,
-          maintenance_required: analysisResult.maintenance_required ?? true,
-          reported_by: 'Elakkiyan (Student Auditor)',
-          voice_transcript: voiceTranscript.trim() || undefined,
-          eco_bounty_eligible: true,
-          eco_bounty_points: points,
-          eco_bounty_rewarded: true,
-          ai_verified: analysisResult.verified !== false,
-          assigned_department: analysisResult.assignedDepartment || 'Facilities General',
-          impact_estimate: analysisResult.impactEstimate,
-          root_cause_analysis: analysisResult.rootCauseAnalysis,
-        };
+      const issueBody = {
+        id: issueId,
+        title: analysisResult.title || `${analysisResult.category} Incident at ${location}`,
+        description: effectiveDesc,
+        category: analysisResult.category?.toLowerCase()?.includes('energy') ? 'energy' : 
+                  analysisResult.category?.toLowerCase()?.includes('water') ? 'water' : 
+                  analysisResult.category?.toLowerCase()?.includes('green') ? 'green_cover' :
+                  analysisResult.category?.toLowerCase()?.includes('plastic') || analysisResult.category?.toLowerCase()?.includes('waste') ? 'waste' : 'other',
+        location,
+        severity: (analysisResult.severity || 'medium').toLowerCase(),
+        status: 'open',
+        image_url: image || undefined,
+        ai_summary: analysisResult.summary,
+        ai_observations: analysisResult.observations,
+        ai_impact: analysisResult.environmental_impact,
+        ai_recommendations: analysisResult.immediate_actions,
+        ai_preventive_actions: analysisResult.preventive_actions,
+        ai_confidence: analysisResult.confidence,
+        ai_uncertainty: analysisResult.uncertainty,
+        maintenance_required: analysisResult.maintenance_required ?? true,
+        reported_by: 'Elakkiyan (Student Auditor)',
+        voice_transcript: voiceTranscript.trim() || undefined,
+        eco_bounty_eligible: true,
+        eco_bounty_points: points,
+        eco_bounty_rewarded: true,
+        ai_verified: analysisResult.verified !== false,
+        assigned_department: analysisResult.assignedDepartment || 'Facilities General',
+        impact_estimate: analysisResult.impactEstimate,
+        root_cause_analysis: analysisResult.rootCauseAnalysis,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
 
+      // Auto-save the reported issue to /api/issues if available
+      try {
         await fetch('/api/issues', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -112,6 +132,9 @@ function ReportPageContent() {
       } catch {
         // Fallback for offline mode
       }
+
+      // Persist in client issues store for GitHub Pages
+      saveClientReportedIssue(issueBody as any);
 
       // Credit eco points to student balance immediately
       if (typeof window !== 'undefined') {
@@ -134,12 +157,18 @@ function ReportPageContent() {
 
       if (typeof window !== 'undefined') {
         sessionStorage.setItem(`pending_analysis_${issueId}`, JSON.stringify(payload));
+        sessionStorage.setItem('pending_analysis_demo', JSON.stringify(payload));
         sessionStorage.setItem('latest_pending_id', issueId);
       }
 
       // Small delay to allow the loading animation steps to complete smoothly
       setTimeout(() => {
-        router.push(`/analysis/${issueId}`);
+        const isGhPages = typeof window !== 'undefined' && 
+          (window.location.hostname.includes('github.io') || window.location.pathname.startsWith('/Green-Minds'));
+        
+        // On static GitHub Pages, /analysis/demo exists statically and renders the freshly stored report
+        const targetRoute = isGhPages ? `/analysis/demo?id=${issueId}` : `/analysis/${issueId}`;
+        router.push(targetRoute);
       }, 1200);
     } catch (err: any) {
       console.error(err);
